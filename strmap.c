@@ -1,29 +1,29 @@
 /*
-This is free and unencumbered software released into the public domain.
-
-Anyone is free to copy, modify, publish, use, compile, sell, or
-distribute this software, either in source code form or as a compiled
-binary, for any purpose, commercial or non-commercial, and by any
-means.
-
-In jurisdictions that recognize copyright laws, the author or authors
-of this software dedicate any and all copyright interest in the
-software to the public domain. We make this dedication for the benefit
-of the public at large and to the detriment of our heirs and
-successors. We intend this dedication to be an overt act of
-relinquishment in perpetuity of all present and future rights to this
-software under copyright law.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-
-For more information, please refer to <https://unlicense.org>
-*/
+ * This is free and unencumbered software released into the public domain.
+ * 
+ * Anyone is free to copy, modify, publish, use, compile, sell, or
+ * distribute this software, either in source code form or as a compiled
+ * binary, for any purpose, commercial or non-commercial, and by any
+ * means.
+ * 
+ * In jurisdictions that recognize copyright laws, the author or authors
+ * of this software dedicate any and all copyright interest in the
+ * software to the public domain. We make this dedication for the benefit
+ * of the public at large and to the detriment of our heirs and
+ * successors. We intend this dedication to be an overt act of
+ * relinquishment in perpetuity of all present and future rights to this
+ * software under copyright law.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ * 
+ * For more information, please refer to <https://unlicense.org> 
+ */
 
 /**
   @file strmap.c
@@ -44,41 +44,47 @@ For more information, please refer to <https://unlicense.org>
 #define POSITION(x, r) ((x) % (r))
 
 struct STRMAP {
-    size_t capacity;  // number of allocated entries
-    size_t size;      // number of keys in map
-    size_t msize;     // max size
-    ENTRY *ht;
+    size_t capacity;            // number of allocated entries
+    size_t size;                // number of keys in map
+    size_t msize;               // max size
+    SM_ENTRY *ht;
 };
 
-static ENTRY EMPTY = {0, 0, 0};
+static SM_ENTRY EMPTY = { 0, 0, 0 };
 
-static size_t DISTANCE(ENTRY *from, ENTRY *to, size_t range) {
+static size_t
+DISTANCE(SM_ENTRY * from, SM_ENTRY * to, size_t range)
+{
     return to >= from ? to - from : range - (from - to);
 }
-static void compress(strmap *sm, ENTRY *entry);
-static ENTRY * find(const strmap *sm, const char *key, size_t hash);
 
-strmap * sm_create(size_t size)
+static void compress(strmap * sm, SM_ENTRY * SM_ENTRY);
+
+static SM_ENTRY *find(const strmap * sm, const char *key, size_t hash);
+
+strmap *
+sm_create(size_t size)
 {
-    ENTRY *ht;
+    SM_ENTRY *ht;
+
     struct STRMAP *sm;
+
     size_t capacity, msize;
 
     msize = (size >= MIN_SIZE ? size : MIN_SIZE);
     capacity = msize + (msize / 3);
     // check capcity > msize
 
-    if (!(ht = (ENTRY *)calloc(capacity, sizeof (ENTRY)))) {
+    if (!(ht = (SM_ENTRY *) calloc(capacity, sizeof (SM_ENTRY)))) {
         errno = ENOMEM;
         return 0;
     }
-    if ((sm = (struct STRMAP *)calloc(1, sizeof (struct STRMAP)))) {
+    if ((sm = (struct STRMAP *) calloc(1, sizeof (struct STRMAP)))) {
         sm->size = 0;
         sm->msize = msize;
         sm->capacity = capacity;
         sm->ht = ht;
-    }
-    else {
+    } else {
         free(ht);
         errno = ENOMEM;
     }
@@ -86,8 +92,11 @@ strmap * sm_create(size_t size)
     return sm;
 }
 
-strmap * sm_create_from(const strmap *sm, size_t size) {
-    ENTRY *item, *entry;
+strmap *
+sm_create_from(const strmap * sm, size_t size)
+{
+    SM_ENTRY *item, *entry;
+
     strmap *map;
 
     assert(sm);
@@ -108,9 +117,11 @@ strmap * sm_create_from(const strmap *sm, size_t size) {
     return map;
 }
 
-SM_RESULT sm_insert(strmap *sm, const char *key, const void *data, ENTRY *item)
+SM_RESULT
+sm_insert(strmap * sm, const char *key, const void *data, SM_ENTRY * item)
 {
-    ENTRY *entry;
+    SM_ENTRY *entry;
+
     size_t hash;
 
     assert(sm);
@@ -136,8 +147,11 @@ SM_RESULT sm_insert(strmap *sm, const char *key, const void *data, ENTRY *item)
     return SM_DUPLICATE;
 }
 
-SM_RESULT sm_update(strmap *sm, const char *key, const void *data, ENTRY *item) {
-    ENTRY *entry;
+SM_RESULT
+sm_update(strmap * sm, const char *key, const void *data, SM_ENTRY * item)
+{
+    SM_ENTRY *entry;
+
     size_t hash;
 
     assert(sm);
@@ -155,8 +169,11 @@ SM_RESULT sm_update(strmap *sm, const char *key, const void *data, ENTRY *item) 
     return SM_NOT_FOUND;
 }
 
-SM_RESULT sm_upsert(strmap *sm, const char *key, const void *data, ENTRY *item) {
-    ENTRY *entry;
+SM_RESULT
+sm_upsert(strmap * sm, const char *key, const void *data, SM_ENTRY * item)
+{
+    SM_ENTRY *entry;
+
     size_t hash;
 
     assert(sm);
@@ -182,9 +199,11 @@ SM_RESULT sm_upsert(strmap *sm, const char *key, const void *data, ENTRY *item) 
     return SM_UPDATED;
 }
 
-SM_RESULT sm_lookup(const strmap *sm, const char *key, ENTRY *item)
+SM_RESULT
+sm_lookup(const strmap * sm, const char *key, SM_ENTRY * item)
 {
-    ENTRY *entry;
+    SM_ENTRY *entry;
+
     size_t hash;
 
     assert(sm);
@@ -195,16 +214,18 @@ SM_RESULT sm_lookup(const strmap *sm, const char *key, ENTRY *item)
     entry = find(sm, key, hash);
 
     if (entry->key) {
-		*item = *entry;
+        *item = *entry;
         return SM_FOUND;
     }
 
     return SM_NOT_FOUND;
 }
 
-SM_RESULT sm_remove(strmap *sm, const char *key, ENTRY *item)
+SM_RESULT
+sm_remove(strmap * sm, const char *key, SM_ENTRY * item)
 {
-    ENTRY *entry;
+    SM_ENTRY *entry;
+
     size_t hash;
 
     assert(sm);
@@ -225,8 +246,10 @@ SM_RESULT sm_remove(strmap *sm, const char *key, ENTRY *item)
     return SM_NOT_FOUND;
 }
 
-void sm_foreach(const strmap *sm, void (*action)(ENTRY item)) {
-    ENTRY *item;
+void
+sm_foreach(const strmap * sm, void (*action) (SM_ENTRY item))
+{
+    SM_ENTRY *item;
 
     assert(sm);
 
@@ -237,8 +260,11 @@ void sm_foreach(const strmap *sm, void (*action)(ENTRY item)) {
     }
 }
 
-double sm_probes_mean(const strmap *sm) {
-    ENTRY *item, *root;
+double
+sm_probes_mean(const strmap * sm)
+{
+    SM_ENTRY *item, *root;
+
     double mean;
 
     assert(sm);
@@ -257,8 +283,11 @@ double sm_probes_mean(const strmap *sm) {
     return mean / sm->size;
 }
 
-double sm_probes_var(const strmap *sm) {
-    ENTRY *item, *root;
+double
+sm_probes_var(const strmap * sm)
+{
+    SM_ENTRY *item, *root;
+
     double var, diff, mean;
 
     assert(sm);
@@ -271,7 +300,7 @@ double sm_probes_var(const strmap *sm) {
     for (var = 0.0, item = sm->ht; item != sm->ht + sm->capacity; ++item) {
         if (item->key) {
             root = sm->ht + POSITION(item->hash, sm->capacity);
-            diff = mean - (double)DISTANCE(root, item, sm->capacity);
+            diff = mean - (double) DISTANCE(root, item, sm->capacity);
             var += diff * diff;
         }
     }
@@ -279,9 +308,10 @@ double sm_probes_var(const strmap *sm) {
     return var / sm->size;
 }
 
-void sm_clear(strmap *sm)
+void
+sm_clear(strmap * sm)
 {
-    ENTRY *item;
+    SM_ENTRY *item;
 
     assert(sm);
 
@@ -291,14 +321,16 @@ void sm_clear(strmap *sm)
     sm->size = 0;
 }
 
-size_t sm_size(const strmap *sm)
+size_t
+sm_size(const strmap * sm)
 {
     assert(sm);
 
     return sm->size;
 }
 
-void sm_free(strmap *sm)
+void
+sm_free(strmap * sm)
 {
     assert(sm);
 
@@ -307,15 +339,17 @@ void sm_free(strmap *sm)
 }
 
 /*
-  private static functions
-*/
+ * private static functions 
+ */
 
 /*
-  find entry with given key and hash in collision chain or return first empty
-*/
-ENTRY * find(const strmap *sm, const char *key, size_t hash)
+ * find entry with given key and hash in collision chain or return first
+ * empty 
+ */
+SM_ENTRY *
+find(const strmap * sm, const char *key, size_t hash)
 {
-    ENTRY *entry, *htEnd;
+    SM_ENTRY *entry, *htEnd;
 
     entry = sm->ht + POSITION(hash, sm->capacity);
     htEnd = sm->ht + sm->capacity;
@@ -335,10 +369,12 @@ ENTRY * find(const strmap *sm, const char *key, size_t hash)
     return entry;
 }
 
-void compress(strmap *sm, ENTRY *entry)
+void
+compress(strmap * sm, SM_ENTRY * entry)
 {
-    ENTRY *empty = entry, *htEnd;
-    ENTRY *root;
+    SM_ENTRY *empty = entry, *htEnd;
+
+    SM_ENTRY *root;
 
     htEnd = sm->ht + sm->capacity;
     if (++entry == htEnd) {
@@ -347,7 +383,7 @@ void compress(strmap *sm, ENTRY *entry)
 
     while (entry->key) {
         root = sm->ht + POSITION(entry->hash, sm->capacity);
-        if (DISTANCE(root, entry, sm->capacity) >= 
+        if (DISTANCE(root, entry, sm->capacity) >=
             DISTANCE(empty, entry, sm->capacity)) {
             // swap current entry with empty
             *empty = *entry;
@@ -360,11 +396,13 @@ void compress(strmap *sm, ENTRY *entry)
     }
 }
 
-size_t poly_hashs(const char *key) {
+size_t
+poly_hashs(const char *key)
+{
     size_t hash = 0;
 
     while (*key) {
-        hash += (hash << 8) + (unsigned char)(*key);
+        hash += (hash << 8) + (unsigned char) (*key);
         ++key;
     }
 

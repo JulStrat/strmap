@@ -25,7 +25,7 @@ void fisher_yates_shuffle(char *s) {
 using namespace std;
 
 // sm_foreach callback
-void check_hash(ENTRY item) {
+void check_hash(SM_ENTRY item) {
     if (poly_hashs(item.key) != item.hash) {
         cout << "Hash error: " << item.hash << '\n'; 
     }
@@ -36,7 +36,7 @@ int main()
     string str  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     string xstr = "ZbcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     std::chrono::duration<double> elapsed;  
-	ENTRY rentry;
+	SM_ENTRY rentry;
 
     // keys to insert 
     vector<string> keys;
