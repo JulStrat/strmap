@@ -25,7 +25,7 @@ void fisher_yates_shuffle(char *s) {
 using namespace std;
 
 // sm_foreach callback
-void check_hash(SM_ENTRY item) {
+void check_hash(SM_ENTRY item, void *ctx) {
     if (poly_hashs(item.key) != item.hash) {
         cout << "Hash error: " << item.hash << '\n'; 
     }
@@ -50,8 +50,8 @@ int main()
     // pointer for lookup
     //int *data;
 
-    strmap *nht;
-    strmap *ht = sm_create(3700000);
+    STRMAP *nht;
+    STRMAP *ht = sm_create(3700000);
 
     auto t1 = Clock::now();      
     for (int i=0; i<3700000; i++) {
@@ -111,7 +111,7 @@ int main()
     cout << "Variance: " << sm_probes_var(ht) << '\n';        
 
     t1 = Clock::now();
-    sm_foreach(ht, check_hash);
+    sm_foreach(ht, check_hash, 0);
     t2 = Clock::now();
     elapsed = t2 - t1;
     cout << "Foreach check_hash(): " << elapsed.count() << '\n';

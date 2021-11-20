@@ -3,3 +3,78 @@
 # strmap
 
 `strmap` - simple alternative to `hcreate_r`, `hdestroy_r`, `hsearch_r` GNU extensions.
+
+## API
+```
+    STRMAP *sm_create(size_t size);
+```
+Create a string map which can contain at least `size` elements.
+    
+```
+    STRMAP *sm_create_from(const STRMAP * sm, size_t size);
+```
+Create `strmap` from existing
+
+```
+    SM_RESULT sm_lookup(const STRMAP * sm, const char *key,
+                        SM_ENTRY * item);
+```
+Retrieves user associated data for given key.
+
+```
+    SM_RESULT sm_insert(STRMAP * sm, const char *key, const void *data,
+                        SM_ENTRY * item);
+```
+Insert key and user data
+
+```
+    SM_RESULT sm_update(STRMAP * sm, const char *key, const void *data,
+                        SM_ENTRY * item);
+```
+Update user data for given key
+
+```
+    SM_RESULT sm_upsert(STRMAP * sm, const char *key, const void *data,
+                        SM_ENTRY * item);
+```
+Update user data for given key or insert if key not exists
+
+```
+    SM_RESULT sm_remove(STRMAP * sm, const char *key, SM_ENTRY * item);
+```
+Remove key
+
+Based on 
+M. A. Kolosovskiy, ["Simple implementation of deletion from open-address hash table"]
+(https://arxiv.org/ftp/arxiv/papers/0909/0909.2547.pdf)
+
+```
+    void sm_foreach(const STRMAP * sm, void (*action) (SM_ENTRY item, void *ctx), void *ctx);
+```    
+For each callback
+
+```
+    void sm_clear(STRMAP * sm);
+```
+Remove all keys
+
+```
+    size_t sm_size(const STRMAP * sm);
+```    
+Return number of keys
+
+```
+    double sm_probes_mean(const STRMAP * sm);
+    double sm_probes_var(const STRMAP * sm);
+```
+Probes mean, variation
+
+```
+    void sm_free(STRMAP * sm);
+```    
+Remove all keys and free memory allocated for the map structure
+
+```
+    size_t poly_hashs(const char *key);
+```    
+String hash

@@ -58,11 +58,11 @@ DISTANCE(SM_ENTRY * from, SM_ENTRY * to, size_t range)
     return to >= from ? to - from : range - (from - to);
 }
 
-static void compress(strmap * sm, SM_ENTRY * SM_ENTRY);
+static void compress(STRMAP * sm, SM_ENTRY * SM_ENTRY);
 
-static SM_ENTRY *find(const strmap * sm, const char *key, size_t hash);
+static SM_ENTRY *find(const STRMAP * sm, const char *key, size_t hash);
 
-strmap *
+STRMAP *
 sm_create(size_t size)
 {
     SM_ENTRY *ht;
@@ -92,12 +92,12 @@ sm_create(size_t size)
     return sm;
 }
 
-strmap *
-sm_create_from(const strmap * sm, size_t size)
+STRMAP *
+sm_create_from(const STRMAP * sm, size_t size)
 {
     SM_ENTRY *item, *entry;
 
-    strmap *map;
+    STRMAP *map;
 
     assert(sm);
 
@@ -118,7 +118,7 @@ sm_create_from(const strmap * sm, size_t size)
 }
 
 SM_RESULT
-sm_insert(strmap * sm, const char *key, const void *data, SM_ENTRY * item)
+sm_insert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
 
@@ -148,7 +148,7 @@ sm_insert(strmap * sm, const char *key, const void *data, SM_ENTRY * item)
 }
 
 SM_RESULT
-sm_update(strmap * sm, const char *key, const void *data, SM_ENTRY * item)
+sm_update(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
 
@@ -170,7 +170,7 @@ sm_update(strmap * sm, const char *key, const void *data, SM_ENTRY * item)
 }
 
 SM_RESULT
-sm_upsert(strmap * sm, const char *key, const void *data, SM_ENTRY * item)
+sm_upsert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
 
@@ -200,7 +200,7 @@ sm_upsert(strmap * sm, const char *key, const void *data, SM_ENTRY * item)
 }
 
 SM_RESULT
-sm_lookup(const strmap * sm, const char *key, SM_ENTRY * item)
+sm_lookup(const STRMAP * sm, const char *key, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
 
@@ -222,7 +222,7 @@ sm_lookup(const strmap * sm, const char *key, SM_ENTRY * item)
 }
 
 SM_RESULT
-sm_remove(strmap * sm, const char *key, SM_ENTRY * item)
+sm_remove(STRMAP * sm, const char *key, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
 
@@ -247,7 +247,7 @@ sm_remove(strmap * sm, const char *key, SM_ENTRY * item)
 }
 
 void
-sm_foreach(const strmap * sm, void (*action) (SM_ENTRY item))
+sm_foreach(const STRMAP * sm, void (*action) (SM_ENTRY item, void *ctx), void *ctx)
 {
     SM_ENTRY *item;
 
@@ -255,13 +255,13 @@ sm_foreach(const strmap * sm, void (*action) (SM_ENTRY item))
 
     for (item = sm->ht; item != sm->ht + sm->capacity; ++item) {
         if (item->key) {
-            action(*item);
+            action(*item, ctx);
         }
     }
 }
 
 double
-sm_probes_mean(const strmap * sm)
+sm_probes_mean(const STRMAP * sm)
 {
     SM_ENTRY *item, *root;
 
@@ -284,7 +284,7 @@ sm_probes_mean(const strmap * sm)
 }
 
 double
-sm_probes_var(const strmap * sm)
+sm_probes_var(const STRMAP * sm)
 {
     SM_ENTRY *item, *root;
 
@@ -309,7 +309,7 @@ sm_probes_var(const strmap * sm)
 }
 
 void
-sm_clear(strmap * sm)
+sm_clear(STRMAP * sm)
 {
     SM_ENTRY *item;
 
@@ -322,7 +322,7 @@ sm_clear(strmap * sm)
 }
 
 size_t
-sm_size(const strmap * sm)
+sm_size(const STRMAP * sm)
 {
     assert(sm);
 
@@ -330,7 +330,7 @@ sm_size(const strmap * sm)
 }
 
 void
-sm_free(strmap * sm)
+sm_free(STRMAP * sm)
 {
     assert(sm);
 
@@ -347,7 +347,7 @@ sm_free(strmap * sm)
  * empty 
  */
 SM_ENTRY *
-find(const strmap * sm, const char *key, size_t hash)
+find(const STRMAP * sm, const char *key, size_t hash)
 {
     SM_ENTRY *entry, *htEnd;
 
@@ -370,7 +370,7 @@ find(const strmap * sm, const char *key, size_t hash)
 }
 
 void
-compress(strmap * sm, SM_ENTRY * entry)
+compress(STRMAP * sm, SM_ENTRY * entry)
 {
     SM_ENTRY *empty = entry, *htEnd;
 

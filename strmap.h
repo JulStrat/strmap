@@ -40,7 +40,7 @@
 #define STRMAP_VERSION_MINOR 3
 #define STRMAP_VERSION_PATCH 1
 
-typedef struct STRMAP strmap;
+typedef struct STRMAP STRMAP;
 
 typedef struct SM_ENTRY {
     const char *key;            // C null terminated string
@@ -66,36 +66,36 @@ extern "C" {
 /**
   @brief Create a string map which can contain at least `size` elements
 */
-    strmap *sm_create(size_t size);
+    STRMAP *sm_create(size_t size);
 
-    strmap *sm_create_from(const strmap * sm, size_t size);
+    STRMAP *sm_create_from(const STRMAP * sm, size_t size);
 
 /**
   @brief Retrieves user associated data for given key
   @return SM_FOUND on success, SM_NOT_FOUND otherwise
 */
-    SM_RESULT sm_lookup(const strmap * sm, const char *key,
+    SM_RESULT sm_lookup(const STRMAP * sm, const char *key,
                         SM_ENTRY * item);
 
 /**
   @brief Insert key (if not exists) and user data
   @return SM_INSERTED on success, SM_DUPLICATE or SM_MAP_FULL otherwise  
 */
-    SM_RESULT sm_insert(strmap * sm, const char *key, const void *data,
+    SM_RESULT sm_insert(STRMAP * sm, const char *key, const void *data,
                         SM_ENTRY * item);
 
 /**
   @brief Update user data for given key
   @return SM_UPDATED on success, SM_NOT_FOUND otherwise    
 */
-    SM_RESULT sm_update(strmap * sm, const char *key, const void *data,
+    SM_RESULT sm_update(STRMAP * sm, const char *key, const void *data,
                         SM_ENTRY * item);
 
 /**
   @brief Update user data for given key or insert if key not exists
   @return SM_UPDATED or SM_INSERTED on success, SM_MAP_FULL otherwise    
 */
-    SM_RESULT sm_upsert(strmap * sm, const char *key, const void *data,
+    SM_RESULT sm_upsert(STRMAP * sm, const char *key, const void *data,
                         SM_ENTRY * item);
 
 /**
@@ -106,30 +106,30 @@ extern "C" {
   https://arxiv.org/ftp/arxiv/papers/0909/0909.2547.pdf
   @return SM_DELETED on success, SM_NOT_FOUND otherwise    
 */
-    SM_RESULT sm_remove(strmap * sm, const char *key, SM_ENTRY * item);
+    SM_RESULT sm_remove(STRMAP * sm, const char *key, SM_ENTRY * item);
 
 /**
   @brief For each callback
 */
-    void sm_foreach(const strmap * sm, void (*action) (SM_ENTRY item));
+    void sm_foreach(const STRMAP * sm, void (*action) (SM_ENTRY item, void *ctx), void *ctx);
 
 /**
   @brief Remove all keys
 */
-    void sm_clear(strmap * sm);
+    void sm_clear(STRMAP * sm);
 
 /**
   @brief Return number of keys
 */
-    size_t sm_size(const strmap * sm);
+    size_t sm_size(const STRMAP * sm);
 
-    double sm_probes_mean(const strmap * sm);
-    double sm_probes_var(const strmap * sm);
+    double sm_probes_mean(const STRMAP * sm);
+    double sm_probes_var(const STRMAP * sm);
 
 /**
   @brief Remove all keys and free memory allocated for the map structure
 */
-    void sm_free(strmap * sm);
+    void sm_free(STRMAP * sm);
 
     size_t poly_hashs(const char *key);
 
