@@ -20,7 +20,7 @@ ___
 ``` C
     SM_RESULT sm_lookup(const STRMAP * sm, const char *key,
                         SM_ENTRY * item);
-``` C
+```
 Retrieves user associated data for given key.
 ___
 ``` C
