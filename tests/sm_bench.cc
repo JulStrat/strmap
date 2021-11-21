@@ -49,9 +49,10 @@ int main()
     int uval = 7117;
     // pointer for lookup
     //int *data;
-
+    size_t csize;
+    
     STRMAP *nht;
-    STRMAP *ht = sm_create(3700000);
+    STRMAP *ht;
 
     auto t1 = Clock::now();      
     for (int i=0; i<3700000; i++) {
@@ -85,9 +86,30 @@ int main()
     cout << "*** strmap test ***\n";
     cout << "*******************\n";    
 
+
+    for (csize = 1000; csize <= 2048000; csize += csize) {
+        ht = sm_create(csize);
+        t1 = Clock::now();        
+        for (int i=0; i<csize; i++) {
+            if (sm_insert(ht, keys[i].c_str(), &val, &rentry) != SM_INSERTED) {
+                cout << "Error: " << keys[i].c_str() << '\n';
+                break;
+            }
+        }
+        t2 = Clock::now();
+        elapsed = t2 - t1;
+        cout << "Insert " << sm_size(ht) << " keys: "<< elapsed.count() << '\n';
+        cout << "Mean: " << sm_probes_mean(ht) << '\n';
+        cout << "Variance: " << sm_probes_var(ht) << '\n';    
+        
+        cout << "*******************\n";            
+        sm_free(ht);
+    }
+
+    ht = sm_create(3700000);
     t1 = Clock::now();
     for (int i=0; i<3700000; i++) {
-        if (!sm_insert(ht, keys[i].c_str(), &val, &rentry)) {
+        if (sm_insert(ht, keys[i].c_str(), &val, &rentry) != SM_INSERTED) {
             cout << "Error: " << keys[i].c_str() << '\n';
             break;
         }

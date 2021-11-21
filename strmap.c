@@ -1,11 +1,11 @@
 /*
  * This is free and unencumbered software released into the public domain.
- * 
+ *
  * Anyone is free to copy, modify, publish, use, compile, sell, or
  * distribute this software, either in source code form or as a compiled
  * binary, for any purpose, commercial or non-commercial, and by any
  * means.
- * 
+ *
  * In jurisdictions that recognize copyright laws, the author or authors
  * of this software dedicate any and all copyright interest in the
  * software to the public domain. We make this dedication for the benefit
@@ -13,22 +13,22 @@
  * successors. We intend this dedication to be an overt act of
  * relinquishment in perpetuity of all present and future rights to this
  * software under copyright law.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- * 
- * For more information, please refer to <https://unlicense.org> 
+ *
+ * For more information, please refer to <https://unlicense.org>
  */
 
 /**
   @file strmap.c
   @brief STRMAP - simple alternative to hcreate_r, hdestroy_r, hsearch_r GNU extensions
-  @author I. Kakoulidis    
+  @author I. Kakoulidis
   @date 2021
   @license Public Domain
 */
@@ -66,9 +66,7 @@ STRMAP *
 sm_create(size_t size)
 {
     SM_ENTRY *ht;
-
     struct STRMAP *sm;
-
     size_t capacity, msize;
 
     msize = (size >= MIN_SIZE ? size : MIN_SIZE);
@@ -96,7 +94,6 @@ STRMAP *
 sm_create_from(const STRMAP * sm, size_t size)
 {
     SM_ENTRY *item, *entry;
-
     STRMAP *map;
 
     assert(sm);
@@ -121,7 +118,6 @@ SM_RESULT
 sm_insert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
-
     size_t hash;
 
     assert(sm);
@@ -151,7 +147,6 @@ SM_RESULT
 sm_update(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
-
     size_t hash;
 
     assert(sm);
@@ -173,7 +168,6 @@ SM_RESULT
 sm_upsert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
-
     size_t hash;
 
     assert(sm);
@@ -203,7 +197,6 @@ SM_RESULT
 sm_lookup(const STRMAP * sm, const char *key, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
-
     size_t hash;
 
     assert(sm);
@@ -225,7 +218,6 @@ SM_RESULT
 sm_remove(STRMAP * sm, const char *key, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
-
     size_t hash;
 
     assert(sm);
@@ -249,13 +241,12 @@ sm_remove(STRMAP * sm, const char *key, SM_ENTRY * item)
 void
 sm_foreach(const STRMAP * sm, void (*action) (SM_ENTRY item, void *ctx), void *ctx)
 {
-    SM_ENTRY *item;
-
+    SM_ENTRY *entry;
     assert(sm);
 
-    for (item = sm->ht; item != sm->ht + sm->capacity; ++item) {
-        if (item->key) {
-            action(*item, ctx);
+    for (entry = sm->ht; entry != sm->ht + sm->capacity; ++entry) {
+        if (entry->key) {
+            action(*entry, ctx);
         }
     }
 }
@@ -263,8 +254,7 @@ sm_foreach(const STRMAP * sm, void (*action) (SM_ENTRY item, void *ctx), void *c
 double
 sm_probes_mean(const STRMAP * sm)
 {
-    SM_ENTRY *item, *root;
-
+    SM_ENTRY *entry, *root;
     double mean;
 
     assert(sm);
@@ -273,10 +263,10 @@ sm_probes_mean(const STRMAP * sm)
         return 0.0;
     }
 
-    for (mean = 0.0, item = sm->ht; item != sm->ht + sm->capacity; ++item) {
-        if (item->key) {
-            root = sm->ht + POSITION(item->hash, sm->capacity);
-            mean += DISTANCE(root, item, sm->capacity);
+    for (mean = 0.0, entry = sm->ht; entry != sm->ht + sm->capacity; ++entry) {
+        if (entry->key) {
+            root = sm->ht + POSITION(entry->hash, sm->capacity);
+            mean += DISTANCE(root, entry, sm->capacity);
         }
     }
 
@@ -286,8 +276,7 @@ sm_probes_mean(const STRMAP * sm)
 double
 sm_probes_var(const STRMAP * sm)
 {
-    SM_ENTRY *item, *root;
-
+    SM_ENTRY *entry, *root;
     double var, diff, mean;
 
     assert(sm);
@@ -297,10 +286,10 @@ sm_probes_var(const STRMAP * sm)
     }
 
     mean = sm_probes_mean(sm);
-    for (var = 0.0, item = sm->ht; item != sm->ht + sm->capacity; ++item) {
-        if (item->key) {
-            root = sm->ht + POSITION(item->hash, sm->capacity);
-            diff = mean - (double) DISTANCE(root, item, sm->capacity);
+    for (var = 0.0, entry = sm->ht; entry != sm->ht + sm->capacity; ++entry) {
+        if (entry->key) {
+            root = sm->ht + POSITION(entry->hash, sm->capacity);
+            diff = mean - (double) DISTANCE(root, entry, sm->capacity);
             var += diff * diff;
         }
     }
@@ -311,12 +300,11 @@ sm_probes_var(const STRMAP * sm)
 void
 sm_clear(STRMAP * sm)
 {
-    SM_ENTRY *item;
-
+    SM_ENTRY *entry;
     assert(sm);
 
-    for (item = sm->ht; item != sm->ht + sm->capacity; ++item) {
-        *item = EMPTY;
+    for (entry = sm->ht; entry != sm->ht + sm->capacity; ++entry) {
+        *entry = EMPTY;
     }
     sm->size = 0;
 }
@@ -339,12 +327,12 @@ sm_free(STRMAP * sm)
 }
 
 /*
- * private static functions 
+ * private static functions
  */
 
 /*
  * find entry with given key and hash in collision chain or return first
- * empty 
+ * empty
  */
 SM_ENTRY *
 find(const STRMAP * sm, const char *key, size_t hash)
@@ -373,7 +361,6 @@ void
 compress(STRMAP * sm, SM_ENTRY * entry)
 {
     SM_ENTRY *empty = entry, *htEnd;
-
     SM_ENTRY *root;
 
     htEnd = sm->ht + sm->capacity;
