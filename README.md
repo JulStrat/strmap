@@ -68,7 +68,7 @@ ___
     double sm_probes_mean(const STRMAP * sm);
     double sm_probes_var(const STRMAP * sm);
 ```
-Probes mean, variation.
+Probes mean, variance.
 ___
 ``` C
     void sm_free(STRMAP * sm);

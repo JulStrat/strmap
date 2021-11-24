@@ -66,7 +66,7 @@ STRMAP *
 sm_create(size_t size)
 {
     SM_ENTRY *ht;
-    struct STRMAP *sm;
+    STRMAP *sm;
     size_t capacity, msize;
 
     msize = (size >= MIN_SIZE ? size : MIN_SIZE);
@@ -77,7 +77,7 @@ sm_create(size_t size)
         errno = ENOMEM;
         return 0;
     }
-    if ((sm = (struct STRMAP *) calloc(1, sizeof (struct STRMAP)))) {
+    if ((sm = (STRMAP *) calloc(1, sizeof (STRMAP)))) {
         sm->size = 0;
         sm->msize = msize;
         sm->capacity = capacity;
@@ -93,7 +93,7 @@ sm_create(size_t size)
 STRMAP *
 sm_create_from(const STRMAP * sm, size_t size)
 {
-    SM_ENTRY *item, *entry;
+    SM_ENTRY *item, *entry, *stop;
     STRMAP *map;
 
     assert(sm);
@@ -103,7 +103,8 @@ sm_create_from(const STRMAP * sm, size_t size)
         return 0;
     }
 
-    for (item = sm->ht; item != sm->ht + sm->capacity; ++item) {
+    stop = sm->ht + sm->capacity;
+    for (item = sm->ht; item != stop; ++item) {
         if (item->key) {
             entry = find(map, item->key, item->hash);
             *entry = *item;
@@ -241,10 +242,11 @@ sm_remove(STRMAP * sm, const char *key, SM_ENTRY * item)
 void
 sm_foreach(const STRMAP * sm, void (*action) (SM_ENTRY item, void *ctx), void *ctx)
 {
-    SM_ENTRY *entry;
+    SM_ENTRY *entry, *stop;
     assert(sm);
 
-    for (entry = sm->ht; entry != sm->ht + sm->capacity; ++entry) {
+    stop = sm->ht + sm->capacity;
+    for (entry = sm->ht; entry != stop; ++entry) {
         if (entry->key) {
             action(*entry, ctx);
         }
@@ -254,7 +256,7 @@ sm_foreach(const STRMAP * sm, void (*action) (SM_ENTRY item, void *ctx), void *c
 double
 sm_probes_mean(const STRMAP * sm)
 {
-    SM_ENTRY *entry, *root;
+    SM_ENTRY *entry, *root, *stop;
     double mean;
 
     assert(sm);
@@ -263,7 +265,8 @@ sm_probes_mean(const STRMAP * sm)
         return 0.0;
     }
 
-    for (mean = 0.0, entry = sm->ht; entry != sm->ht + sm->capacity; ++entry) {
+    stop = sm->ht + sm->capacity;
+    for (mean = 0.0, entry = sm->ht; entry != stop; ++entry) {
         if (entry->key) {
             root = sm->ht + POSITION(entry->hash, sm->capacity);
             mean += DISTANCE(root, entry, sm->capacity);
@@ -276,7 +279,7 @@ sm_probes_mean(const STRMAP * sm)
 double
 sm_probes_var(const STRMAP * sm)
 {
-    SM_ENTRY *entry, *root;
+    SM_ENTRY *entry, *root, *stop;
     double var, diff, mean;
 
     assert(sm);
@@ -286,10 +289,11 @@ sm_probes_var(const STRMAP * sm)
     }
 
     mean = sm_probes_mean(sm);
-    for (var = 0.0, entry = sm->ht; entry != sm->ht + sm->capacity; ++entry) {
+    stop = sm->ht + sm->capacity;    
+    for (var = 0.0, entry = sm->ht; entry != stop; ++entry) {
         if (entry->key) {
             root = sm->ht + POSITION(entry->hash, sm->capacity);
-            diff = mean - (double) DISTANCE(root, entry, sm->capacity);
+            diff = mean - DISTANCE(root, entry, sm->capacity);
             var += diff * diff;
         }
     }
@@ -300,10 +304,11 @@ sm_probes_var(const STRMAP * sm)
 void
 sm_clear(STRMAP * sm)
 {
-    SM_ENTRY *entry;
+    SM_ENTRY *entry, *stop;
     assert(sm);
 
-    for (entry = sm->ht; entry != sm->ht + sm->capacity; ++entry) {
+    stop = sm->ht + sm->capacity;
+    for (entry = sm->ht; entry != stop; ++entry) {
         *entry = EMPTY;
     }
     sm->size = 0;
@@ -337,10 +342,10 @@ sm_free(STRMAP * sm)
 SM_ENTRY *
 find(const STRMAP * sm, const char *key, size_t hash)
 {
-    SM_ENTRY *entry, *htEnd;
+    SM_ENTRY *entry, *stop;
 
     entry = sm->ht + POSITION(hash, sm->capacity);
-    htEnd = sm->ht + sm->capacity;
+    stop = sm->ht + sm->capacity;
 
     while (entry->key) {
         if (hash == entry->hash) {
@@ -349,7 +354,7 @@ find(const STRMAP * sm, const char *key, size_t hash)
             }
         }
 
-        if (++entry == htEnd) {
+        if (++entry == stop) {
             entry = sm->ht;
         }
     }
@@ -360,11 +365,11 @@ find(const STRMAP * sm, const char *key, size_t hash)
 void
 compress(STRMAP * sm, SM_ENTRY * entry)
 {
-    SM_ENTRY *empty = entry, *htEnd;
+    SM_ENTRY *empty = entry, *stop;
     SM_ENTRY *root;
 
-    htEnd = sm->ht + sm->capacity;
-    if (++entry == htEnd) {
+    stop = sm->ht + sm->capacity;
+    if (++entry == stop) {
         entry = sm->ht;
     }
 
@@ -377,7 +382,7 @@ compress(STRMAP * sm, SM_ENTRY * entry)
             *entry = EMPTY;
             empty = entry;
         }
-        if (++entry == htEnd) {
+        if (++entry == stop) {
             entry = sm->ht;
         }
     }
