@@ -123,7 +123,6 @@ sm_insert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 
     assert(sm);
     assert(key);
-    assert(item);
 
     if (sm->size == sm->msize) {
         return SM_MAP_FULL;
@@ -135,7 +134,9 @@ sm_insert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
         entry->key = key;
         entry->data = data;
         entry->hash = hash;
-        *item = *entry;
+        if (item) {
+            *item = *entry;            
+        }
         ++(sm->size);
 
         return SM_INSERTED;
@@ -152,12 +153,13 @@ sm_update(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 
     assert(sm);
     assert(key);
-    assert(item);
 
     hash = poly_hashs(key);
     entry = find(sm, key, hash);
     if (entry->key) {
-        *item = *entry;
+        if (item) {
+            *item = *entry;            
+        }
         entry->data = data;
         return SM_UPDATED;
     }
@@ -173,12 +175,13 @@ sm_upsert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 
     assert(sm);
     assert(key);
-    assert(item);
 
     hash = poly_hashs(key);
     entry = find(sm, key, hash);
     if (entry->key) {
-        *item = *entry;
+        if (item) {
+            *item = *entry;            
+        }
         entry->data = data;
         return SM_UPDATED;
     }
@@ -188,7 +191,9 @@ sm_upsert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
     entry->key = key;
     entry->data = data;
     entry->hash = hash;
-    *item = *entry;
+    if (item) {
+        *item = *entry;            
+    }
     ++(sm->size);
 
     return SM_UPDATED;
@@ -202,13 +207,14 @@ sm_lookup(const STRMAP * sm, const char *key, SM_ENTRY * item)
 
     assert(sm);
     assert(key);
-    assert(item);
 
     hash = poly_hashs(key);
     entry = find(sm, key, hash);
 
     if (entry->key) {
-        *item = *entry;
+        if (item) {
+            *item = *entry;            
+        }
         return SM_FOUND;
     }
 
@@ -223,13 +229,14 @@ sm_remove(STRMAP * sm, const char *key, SM_ENTRY * item)
 
     assert(sm);
     assert(key);
-    assert(item);
 
     hash = poly_hashs(key);
     entry = find(sm, key, hash);
 
     if (entry->key) {
-        *item = *entry;
+        if (item) {
+            *item = *entry;            
+        }
         *entry = EMPTY;
         --(sm->size);
         compress(sm, entry);
