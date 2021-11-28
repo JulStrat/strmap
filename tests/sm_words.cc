@@ -58,7 +58,8 @@ int main(int argc, char** argv)
 
     auto t1 = Clock::now();      
     // Load words
-    ifstream fwords("tests/slice-03");
+    // ifstream fwords("tests/slice-03");
+    ifstream fwords("tests/words.txt");    
     string word;
     while (getline(fwords, word)) {
         //cout << word << "\n";

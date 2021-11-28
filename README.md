@@ -4,6 +4,10 @@
 
 `strmap` - simple alternative to `hcreate_r`, `hdestroy_r`, `hsearch_r` GNU extensions.
 
+Benchmark data:
+- [English words](https://github.com/dwyl/english-words/blob/master/words.txt) - 466550 keys 
+- ASCII letters permutations - 3700000 keys
+
 ## API
 
 ``` C

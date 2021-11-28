@@ -50,17 +50,12 @@ struct STRMAP {
     SM_ENTRY *ht;
 };
 
-static SM_ENTRY EMPTY = { 0, 0, 0 };
-
-static size_t
-DISTANCE(SM_ENTRY * from, SM_ENTRY * to, size_t range)
-{
-    return to >= from ? to - from : range - (from - to);
-}
-
-static void compress(STRMAP * sm, SM_ENTRY * SM_ENTRY);
+static const SM_ENTRY EMPTY = { 0, 0, 0 };
 
 static SM_ENTRY *find(const STRMAP * sm, const char *key, size_t hash);
+static void compress(STRMAP * sm, SM_ENTRY * SM_ENTRY);
+static size_t distance(SM_ENTRY * from, SM_ENTRY * to, size_t range);
+static size_t adjust(size_t x);
 
 STRMAP *
 sm_create(size_t size)
@@ -70,7 +65,9 @@ sm_create(size_t size)
     size_t capacity, msize;
 
     msize = (size >= MIN_SIZE ? size : MIN_SIZE);
-    capacity = msize + (msize / 3);
+    capacity = msize + (msize / 2);
+    capacity = adjust(capacity);
+
     // check capcity > msize
 
     if (!(ht = (SM_ENTRY *) calloc(capacity, sizeof (SM_ENTRY)))) {
@@ -276,11 +273,11 @@ sm_probes_mean(const STRMAP * sm)
     for (mean = 0.0, entry = sm->ht; entry != stop; ++entry) {
         if (entry->key) {
             root = sm->ht + POSITION(entry->hash, sm->capacity);
-            mean += DISTANCE(root, entry, sm->capacity);
+            mean += (double)distance(root, entry, sm->capacity);
         }
     }
 
-    return mean / sm->size;
+    return mean / (double)sm->size;
 }
 
 double
@@ -300,12 +297,12 @@ sm_probes_var(const STRMAP * sm)
     for (var = 0.0, entry = sm->ht; entry != stop; ++entry) {
         if (entry->key) {
             root = sm->ht + POSITION(entry->hash, sm->capacity);
-            diff = mean - DISTANCE(root, entry, sm->capacity);
+            diff = mean - (double)distance(root, entry, sm->capacity);
             var += diff * diff;
         }
     }
 
-    return var / sm->size;
+    return var / (double)sm->size;
 }
 
 void
@@ -341,6 +338,28 @@ sm_free(STRMAP * sm)
 /*
  * private static functions
  */
+
+static size_t
+distance(SM_ENTRY * from, SM_ENTRY * to, size_t range)
+{
+    return to >= from ? to - from : range - (from - to);
+}
+
+static size_t
+adjust(size_t x) 
+{
+    static const int WHEEL[30] = {
+        1, 0, 5, 4, 3, 2,
+        1, 0, 3, 2, 1, 0,
+        1, 0, 3, 2, 1, 0,
+        1, 0, 3, 2, 1, 0,
+        5, 4, 3, 2, 1, 0
+    };
+    x += WHEEL[x % 30];
+    assert((x % 2) && (x % 3) && (x % 5));
+
+    return x;
+}
 
 /*
  * find entry with given key and hash in collision chain or return first
@@ -382,8 +401,8 @@ compress(STRMAP * sm, SM_ENTRY * entry)
 
     while (entry->key) {
         root = sm->ht + POSITION(entry->hash, sm->capacity);
-        if (DISTANCE(root, entry, sm->capacity) >=
-            DISTANCE(empty, entry, sm->capacity)) {
+        if (distance(root, entry, sm->capacity) >=
+            distance(empty, entry, sm->capacity)) {
             // swap current entry with empty
             *empty = *entry;
             *entry = EMPTY;
