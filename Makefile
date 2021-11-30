@@ -1,6 +1,6 @@
 CC = g++
-#CFLAGS = -m32 -O2 -w -Wall -Wextra -Wconversion -pedantic
-CFLAGS = -O2 -w -Wall -Wextra -Wconversion -pedantic
+#CFLAGS = -m32 -O2 -w -Wall -Wextra -Wconversion -Wshadow -pedantic
+CFLAGS = -O2 -w -Wall -Wextra -Wconversion -Wshadow -pedantic
 
 all: sm_bench sm_words
 
@@ -18,6 +18,9 @@ sm_words.o: tests/sm_words.cc
 
 strmap.o: strmap.c strmap.h
 	$(CC) -c $(CFLAGS) -o strmap.o strmap.c
+
+bench:
+	./sm_bench
 
 clean:
 	rm *.o *.exe

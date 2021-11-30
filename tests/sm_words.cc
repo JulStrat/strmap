@@ -59,7 +59,7 @@ int main(int argc, char** argv)
     auto t1 = Clock::now();      
     // Load words
     // ifstream fwords("tests/slice-03");
-    ifstream fwords("tests/words.txt");    
+    ifstream fwords(argv[1]);    
     string word;
     while (getline(fwords, word)) {
         //cout << word << "\n";
@@ -90,55 +90,24 @@ int main(int argc, char** argv)
     cout << "*************************\n";
     cout << "*** strmap words test ***\n";
     cout << "*************************\n";    
-/*
-    for (csize = 1000; csize <= 2048000; csize += csize) {
-        ht = sm_create(csize);
-        t1 = Clock::now();        
-        for (int i=0; i<csize; i++) {
-            if (sm_insert(ht, keys[i].c_str(), &val, &rentry) != SM_INSERTED) {
-                cout << "Error: " << keys[i].c_str() << '\n';
-                break;
-            }
-        }
-        t2 = Clock::now();
-        elapsed = t2 - t1;
-        cout << "Insert " << sm_size(ht) << " keys: "<< elapsed.count() << '\n';
-        cout << "Mean: " << sm_probes_mean(ht) << '\n';
-        cout << "Variance: " << sm_probes_var(ht) << '\n';    
-        
-        cout << "*******************\n";            
-        sm_free(ht);
-    }
-*/
+
     ht = sm_create(keys.size());
-    //assert(ht);
+
     t1 = Clock::now();
     for (int i=0; i<keys.size(); i++) {
         if (sm_insert(ht, keys[i].c_str(), &val, &rentry) != SM_INSERTED) {
-            cout << "Error: " << keys[i].c_str() << '\n';
+            ;
+            //cout << "Error: " << keys[i].c_str() << '\n';
             //break;
         }
     }
     t2 = Clock::now();
     elapsed = t2 - t1;
-    cout << "Insert: " << elapsed.count() << '\n';
+    cout << "Insert " << sm_size(ht) << " keys: " << elapsed.count() << '\n';
     
     cout << "Mean: " << sm_probes_mean(ht) << '\n';
     cout << "Variance: " << sm_probes_var(ht) << '\n';    
 
-
-/*
-    t1 = Clock::now();    
-    nht = sm_create_from(ht, 5000000);
-    sm_free(ht);
-    ht = nht;    
-    t2 = Clock::now();
-    elapsed = t2 - t1;
-    cout << "Create from: " << elapsed.count() << '\n';
-    
-    cout << "Mean: " << sm_probes_mean(ht) << '\n';   
-    cout << "Variance: " << sm_probes_var(ht) << '\n';        
-*/
     t1 = Clock::now();
     sm_foreach(ht, check_hash, 0);
     t2 = Clock::now();
@@ -201,7 +170,8 @@ int main(int argc, char** argv)
     t1 = Clock::now();
     for (int i=0; i<keys.size(); i++) {
         if (sm_remove(ht, keys[i].c_str(), &rentry) != SM_REMOVED) {
-            cout << keys[i]; 
+            ;
+            //cout << keys[i]; 
             //break;            
         }
     }

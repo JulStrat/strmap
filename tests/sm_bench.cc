@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <chrono>
-
+#include <cstring>
 //#define USE_FAST_REDUCE 1
 #include "strmap.h"
 

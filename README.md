@@ -4,7 +4,19 @@
 
 `strmap` - simple alternative to `hcreate_r`, `hdestroy_r`, `hsearch_r` GNU extensions.
 
-Benchmark data:
+## Implementation
+
+- Open addressing with linear probing for collision resolution.
+- Back shift key deletion algorithm.
+- `STRMAP *sm_create_from()` - creates new `strmap` from existing. Auto growing feature not implemented.
+- `foreach` key iterator.
+- Probes mean, variance statistics.
+- String polynomial hash function
+
+<code>hash(s<sub>n</sub>) = s[0]*257<sup>n-1</sup> + s[1]*257<sup>n-2</sup> + s[2]*257<sup>n-3</sup> + ... + s[n-1]*257<sup>0</sup></code>
+
+## Benchmark
+
 - [English words](https://github.com/dwyl/english-words/blob/master/words.txt) - 466550 keys 
 - ASCII letters permutations - 3700000 keys
 

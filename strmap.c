@@ -41,6 +41,7 @@
 #include "strmap.h"
 
 #define MIN_SIZE 6
+#define LOAD_FACTOR (2.0 / 3)
 #define POSITION(x, r) ((x) % (r))
 
 struct STRMAP {
@@ -65,7 +66,7 @@ sm_create(size_t size)
     size_t capacity, msize;
 
     msize = (size >= MIN_SIZE ? size : MIN_SIZE);
-    capacity = msize + (msize / 2);
+    capacity = (size_t)(msize / LOAD_FACTOR);
     capacity = adjust(capacity);
 
     // check capcity > msize
