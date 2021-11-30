@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <cstring>
 
 //#define USE_FAST_REDUCE 1
 //#include <cassert>
