@@ -1,3 +1,4 @@
+[![C/C++ CI](https://github.com/JulStrat/strmap/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/JulStrat/strmap/actions/workflows/c-cpp.yml)
 [![GitHub license](https://img.shields.io/github/license/JulStrat/strmap)](https://github.com/JulStrat/strmap/blob/strmap/LICENSE)
 
 # strmap
@@ -9,7 +10,7 @@
 - Open addressing with linear probing for collision resolution.
 - Back shift key deletion algorithm.
 - `STRMAP *sm_create_from()` - creates new `strmap` from existing. Auto growing feature not implemented.
-- `foreach` key iterator.
+- `foreach` read-only keys iterator.
 - Probes mean, variance statistics.
 - String polynomial hash function
 
