@@ -284,7 +284,7 @@ int main()
     
     t1 = Clock::now();
     for (int i=0; i<3700000; i++) {
-      strmap.insert({keys[i], 0});  
+      strmap.insert(make_pair(keys[i], 0));  
     }
     t2 = Clock::now();
     elapsed = t2 - t1;
