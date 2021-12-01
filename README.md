@@ -19,7 +19,7 @@
 ## Benchmark
 
 - [English words](https://github.com/dwyl/english-words/blob/master/words.txt) - 466550 keys 
-- ASCII letters permutations - 3700000 keys
+- ASCII letters and digits permutations - 3700000 keys
 
 ## API
 

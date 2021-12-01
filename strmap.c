@@ -54,8 +54,8 @@ struct STRMAP {
 static const SM_ENTRY EMPTY = { 0, 0, 0 };
 
 static SM_ENTRY *find(const STRMAP * sm, const char *key, size_t hash);
-static void compress(STRMAP * sm, SM_ENTRY * SM_ENTRY);
-static size_t distance(SM_ENTRY * from, SM_ENTRY * to, size_t range);
+static void compress(STRMAP * sm, SM_ENTRY * entry);
+static size_t distance(const SM_ENTRY * from, const SM_ENTRY * to, size_t range);
 static size_t adjust(size_t x);
 
 STRMAP *
@@ -341,7 +341,7 @@ sm_free(STRMAP * sm)
  */
 
 static size_t
-distance(SM_ENTRY * from, SM_ENTRY * to, size_t range)
+distance(const SM_ENTRY * from, const SM_ENTRY * to, size_t range)
 {
     return to >= from ? to - from : range - (from - to);
 }
@@ -427,3 +427,7 @@ poly_hashs(const char *key)
 
     return hash;
 }
+
+#undef MIN_SIZE
+#undef LOAD_FACTOR
+#undef POSITION(x, r)
