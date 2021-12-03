@@ -18,8 +18,17 @@
 
 ## Benchmark
 
-- [English words](https://github.com/dwyl/english-words/blob/master/words.txt) - 466550 keys 
+- [English words](https://github.com/dwyl/english-words/blob/master/words.txt) - 466550 keys
+
+Load factor: 0.67 \
+Mean: 1.13324 \
+Variance: 10.6365
+ 
 - ASCII letters and digits permutations - 3700000 keys
+
+Load factor: 0.67 \
+Mean: 0.999451 \
+Variance: 6.65084
 
 ## API
 

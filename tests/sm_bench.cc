@@ -5,7 +5,7 @@
 #include <iostream>
 #include <chrono>
 #include <cstring>
-//#define USE_FAST_REDUCE 1
+
 #include "strmap.h"
 
 typedef std::chrono::high_resolution_clock Clock;
@@ -120,6 +120,32 @@ int main()
     
     cout << "Mean: " << sm_probes_mean(ht) << '\n';
     cout << "Variance: " << sm_probes_var(ht) << '\n';    
+
+    t1 = Clock::now();
+    for (int i=0; i<3700000; i++) {
+        if (sm_lookup(ht, keys[i].c_str(), &rentry)  != SM_FOUND) {
+            cout << "Error: " << keys[i] << '\n';
+            break;
+        }
+        if (*(int *)rentry.data != 1551) {
+            cout << "Error: " << keys[i] << " Data:" << *(int *)rentry.data << '\n';
+            break;
+        }
+    }
+    t2 = Clock::now();
+    elapsed = t2 - t1;
+    cout << "Lookup existing: " << elapsed.count() << '\n';
+
+    t1 = Clock::now();
+    for (int i=0; i<3700000; i++) {
+        if (sm_lookup(ht, xkeys[i].c_str(), &rentry) != SM_NOT_FOUND) {
+            cout << "Error: " << xkeys[i] << '\n';  ;
+            break;
+        }
+    }
+    t2 = Clock::now();
+    elapsed = t2 - t1;
+    cout << "Lookup not existing: " << elapsed.count() << '\n';
 
     t1 = Clock::now();    
     nht = sm_create_from(ht, 5000000);

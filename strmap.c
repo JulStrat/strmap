@@ -392,9 +392,9 @@ find(const STRMAP * sm, const char *key, size_t hash)
 void
 compress(STRMAP * sm, SM_ENTRY * entry)
 {
-    SM_ENTRY *empty = entry, *stop;
-    SM_ENTRY *root;
+    SM_ENTRY *empty, *root, *stop;
 
+    empty = entry;
     stop = sm->ht + sm->capacity;
     if (++entry == stop) {
         entry = sm->ht;
@@ -430,4 +430,4 @@ poly_hashs(const char *key)
 
 #undef MIN_SIZE
 #undef LOAD_FACTOR
-#undef POSITION(x, r)
+#undef POSITION
