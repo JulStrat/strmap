@@ -17,5 +17,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: make
       run: make
-    - name: make bench
-      run: make bench
+    - name: bench
+      run: ./sm_bench
+    - name: words
+      run: ./sm_words tests/words.txt

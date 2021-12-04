@@ -19,9 +19,6 @@ sm_words.o: tests/sm_words.cc
 strmap.o: strmap.c strmap.h
 	$(CC) -c $(CFLAGS) -o strmap.o strmap.c
 
-bench:
-	./sm_bench
-
 clean:
 	rm *.o *.exe
 
