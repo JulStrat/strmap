@@ -18,17 +18,23 @@
 
 ## Benchmark
 
-- [English words](https://github.com/dwyl/english-words/blob/master/words.txt) - 466550 keys
+- `hashmap`: `strmap` vs [hashmap.h](https://github.com/sheredom/hashmap.h). ASCII letters and digits permutations - 4194304 keys.
 
-Load factor: 0.67 \
-Mean: 1.13324 \
-Variance: 10.6365
+Load factor: 0.7 \
+Mean: 1.22697 \
+Variance: 10.047
+
+- `words`: [English words](https://github.com/dwyl/english-words/blob/master/words.txt) - 466550 keys.
+
+Load factor: 0.7 \
+Mean: 1.32653 \
+Variance: 14.8107
  
-- ASCII letters and digits permutations - 3700000 keys
+- `bench`: ASCII letters and digits permutations - 3700000 keys.
 
-Load factor: 0.67 \
-Mean: 0.999451 \
-Variance: 6.65084
+Load factor: 0.7 \
+Mean: 1.26022 \
+Variance: 11.3293
 
 ## API
 
