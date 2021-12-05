@@ -1,23 +1,29 @@
-CC = g++
-#CFLAGS = -m32 -O2 -w -Wall -Wextra -Wconversion -Wshadow -pedantic
-CFLAGS = -O2 -w -Wall -Wextra -Wconversion -Wshadow -pedantic
+CXX = g++
+#CXXFLAGS = -m32 -O2 -w -Wall -Wextra -Wconversion -Wshadow -pedantic
+CXXFLAGS = -O2 -w -Wall -Wextra -Wconversion -Wshadow -pedantic
 
-all: sm_bench sm_words
+all: bench words hashmap
 
-sm_bench: sm_bench.o strmap.o
-	$(CC) $(CFLAGS) -o sm_bench sm_bench.o strmap.o
+bench: bench.o strmap.o
+	$(CXX) $(CXXFLAGS) -o bench bench.o strmap.o
 
-sm_bench.o: tests/sm_bench.cc
-	$(CC) -c $(CFLAGS) -o sm_bench.o -I. tests/sm_bench.cc
+bench.o: benchs/bench.cc
+	$(CXX) -c $(CXXFLAGS) -o bench.o -I. benchs/bench.cc
 
-sm_words: sm_words.o strmap.o
-	$(CC) $(CFLAGS) -o sm_words sm_words.o strmap.o
+hashmap: hashmap.o strmap.o
+	$(CXX) $(CXXFLAGS) -o hashmap hashmap.o strmap.o
 
-sm_words.o: tests/sm_words.cc
-	$(CC) -c $(CFLAGS) -o sm_words.o -I. tests/sm_words.cc
+hashmap.o: benchs/hashmap.cc
+	$(CXX) -c $(CXXFLAGS) -o hashmap.o -I. benchs/hashmap.cc
+
+words: words.o strmap.o
+	$(CXX) $(CXXFLAGS) -o words words.o strmap.o
+
+words.o: benchs/words.cc
+	$(CXX) -c $(CXXFLAGS) -o words.o -I. benchs/words.cc
 
 strmap.o: strmap.c strmap.h
-	$(CC) -c $(CFLAGS) -o strmap.o strmap.c
+	$(CXX) -c $(CXXFLAGS) -o strmap.o strmap.c
 
 clean:
 	rm *.o *.exe

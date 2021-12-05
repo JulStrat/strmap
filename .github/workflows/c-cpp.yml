@@ -18,6 +18,9 @@ jobs:
     - name: make
       run: make
     - name: bench
-      run: ./sm_bench
+      run: ./bench
+    - name: hashmap
+      run: ./hashmap
     - name: words
-      run: ./sm_words tests/words.txt
+      run: ./words benchs/words.txt
+      
