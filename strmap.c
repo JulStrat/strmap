@@ -45,9 +45,9 @@
 #define POSITION(x, r) ((x) % (r))
 
 struct STRMAP {
-    size_t capacity;            // number of allocated entries
-    size_t size;                // number of keys in map
-    size_t msize;               // max size
+    size_t capacity;            /* number of allocated entries */
+    size_t size;                /* number of keys in map */
+    size_t msize;               /* max size */
     SM_ENTRY *ht;
 };
 
@@ -69,7 +69,7 @@ sm_create(size_t size)
     capacity = (size_t)(msize / LOAD_FACTOR);
     capacity = adjust(capacity);
 
-    // check capcity > msize
+    /* check capcity > msize */
 
     if (!(ht = (SM_ENTRY *) calloc(capacity, sizeof (SM_ENTRY)))) {
         errno = ENOMEM;
@@ -404,7 +404,7 @@ compress(STRMAP * sm, SM_ENTRY * entry)
         root = sm->ht + POSITION(entry->hash, sm->capacity);
         if (distance(root, entry, sm->capacity) >=
             distance(empty, entry, sm->capacity)) {
-            // swap current entry with empty
+            /* swap current entry with empty */
             *empty = *entry;
             *entry = EMPTY;
             empty = entry;

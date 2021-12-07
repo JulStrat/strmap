@@ -43,12 +43,12 @@
 typedef struct STRMAP STRMAP;
 
 typedef struct SM_ENTRY {
-    const char *key;            // C null terminated string
-    const void *data;           // user data
-    size_t hash;                // key hash value
+    const char *key;            /* C null terminated string */
+    const void *data;           /* user data */
+    size_t hash;                /* key hash value */
 } SM_ENTRY;
 
-enum SM_RESULT {
+typedef enum SM_RESULT {
     SM_NOT_FOUND = -1,
     SM_DUPLICATE = -2,
     SM_MAP_FULL = -3,
@@ -57,7 +57,7 @@ enum SM_RESULT {
     SM_INSERTED = 2,
     SM_UPDATED = 3,
     SM_REMOVED = 4
-};
+} SM_RESULT;
 
 #ifdef __cplusplus
 extern "C" {

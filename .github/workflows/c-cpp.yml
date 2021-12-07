@@ -19,8 +19,14 @@ jobs:
       run: make
     - name: bench
       run: ./bench
-    - name: hashmap
-      run: ./hashmap
     - name: words
       run: ./words benchs/words.txt
-      
+    - name: hashmap_1
+      run: ./hashmap 1048576
+    - name: hashmap_2
+      run: ./hashmap 2097152
+    - name: hashmap_3
+      run: ./hashmap 4194304
+    - name: hashmap_4
+      run: ./hashmap 8388608
+

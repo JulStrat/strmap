@@ -7,7 +7,7 @@
 #include "strmap.h"
 #include "hashmap.h"
 
-#define MAP_SIZE 1024*1024*4
+unsigned int MAP_SIZE = 1024;
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -32,7 +32,7 @@ void check_hash(SM_ENTRY item, void *ctx) {
     }
 }
 
-int main()
+int main(int argc, char **argv)
 {
     string str  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     string xstr = "ZbcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -54,6 +54,9 @@ int main()
     
     STRMAP *ht;
     struct hashmap_s hm;
+   
+    char *ptr;    
+    MAP_SIZE = strtoul(argv[1], &ptr, 10);
 
     auto t1 = Clock::now();      
     for (int i=0; i<MAP_SIZE; i++) {
