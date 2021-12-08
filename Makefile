@@ -1,4 +1,5 @@
-CXX = g++
+CC  = gcc
+CXX = c++
 #CXXFLAGS = -m32 -O2 -w -Wall -Wextra -Wconversion -Wshadow -pedantic
 CXXFLAGS = -O2 -w -Wall -Wextra -Wconversion -Wshadow -pedantic
 
@@ -23,7 +24,7 @@ words.o: benchs/words.cc
 	$(CXX) -c $(CXXFLAGS) -o words.o -I. benchs/words.cc
 
 strmap.o: strmap.c strmap.h
-	$(CXX) -c $(CXXFLAGS) -o strmap.o strmap.c
+	$(CC) -std=c89 -ansi -c $(CXXFLAGS) -o strmap.o strmap.c
 
 clean:
 	rm *.o *.exe

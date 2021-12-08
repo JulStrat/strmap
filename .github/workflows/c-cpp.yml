@@ -18,15 +18,15 @@ jobs:
     - name: make
       run: make
     - name: bench
-      run: ./bench
+      run: time ./bench
     - name: words
-      run: ./words benchs/words.txt
+      run: time ./words benchs/words.txt
     - name: hashmap_1
-      run: ./hashmap 1048576
+      run: time ./hashmap 1048576
     - name: hashmap_2
-      run: ./hashmap 2097152
+      run: time ./hashmap 2097152
     - name: hashmap_3
-      run: ./hashmap 4194304
+      run: time ./hashmap 4194304
     - name: hashmap_4
-      run: ./hashmap 8388608
+      run: time ./hashmap 8388608
 
