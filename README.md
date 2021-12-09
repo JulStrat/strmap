@@ -18,11 +18,11 @@
 
 ## Benchmark
 
-- `hashmap`: `strmap` vs [hashmap.h](https://github.com/sheredom/hashmap.h). ASCII letters and digits permutations - 4194304 keys.
+- `robin_hood`: `strmap` vs [robin-hood-hashing](https://github.com/martinus/robin-hood-hashing). ASCII letters and digits permutations - 8000000 keys.
 
 Load factor: 0.7 \
-Mean: 1.22697 \
-Variance: 10.047
+Mean: 1.16595 \
+Variance: 9.43266
 
 - `words`: [English words](https://github.com/dwyl/english-words/blob/master/words.txt) - 466550 keys.
 

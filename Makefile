@@ -1,21 +1,21 @@
 CC  = gcc
 CXX = c++
-#CXXFLAGS = -m32 -O2 -w -Wall -Wextra -Wconversion -Wshadow -pedantic
-CXXFLAGS = -O2 -w -Wall -Wextra -Wconversion -Wshadow -pedantic
+#CXXFLAGS = -m32 -O2 -Wall -Wextra -Wconversion -Wshadow -pedantic
+CXXFLAGS = -O2 -Wall -Wextra -Wconversion -Wshadow -pedantic
 
-all: bench words hashmap
+all: bench words robin_hood
+
+robin_hood: robin_hood.o strmap.o
+	$(CXX) $(CXXFLAGS) -o robin_hood robin_hood.o strmap.o
+
+robin_hood.o: benchs/robin_hood.cc
+	$(CXX) -c $(CXXFLAGS) -o robin_hood.o -I. -Ibenchs benchs/robin_hood.cc
 
 bench: bench.o strmap.o
 	$(CXX) $(CXXFLAGS) -o bench bench.o strmap.o
 
 bench.o: benchs/bench.cc
 	$(CXX) -c $(CXXFLAGS) -o bench.o -I. benchs/bench.cc
-
-hashmap: hashmap.o strmap.o
-	$(CXX) $(CXXFLAGS) -o hashmap hashmap.o strmap.o
-
-hashmap.o: benchs/hashmap.cc
-	$(CXX) -c $(CXXFLAGS) -o hashmap.o -I. benchs/hashmap.cc
 
 words: words.o strmap.o
 	$(CXX) $(CXXFLAGS) -o words words.o strmap.o

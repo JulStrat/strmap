@@ -16,17 +16,17 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: make
-      run: make
+      run: make all
     - name: bench
       run: time ./bench
     - name: words
       run: time ./words benchs/words.txt
-    - name: hashmap_1
-      run: time ./hashmap 1048576
+    - name: robin_hood_1
+      run: time ./robin_hood 1048576
     - name: hashmap_2
-      run: time ./hashmap 2097152
+      run: time ./robin_hood 2097152
     - name: hashmap_3
-      run: time ./hashmap 4194304
+      run: time ./robin_hood 4194304
     - name: hashmap_4
-      run: time ./hashmap 8388608
+      run: time ./robin_hood 8388608
 
