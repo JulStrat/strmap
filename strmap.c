@@ -40,8 +40,11 @@
 
 #include "strmap.h"
 
-#define MIN_SIZE 6
-#define LOAD_FACTOR 0.7
+static const size_t MIN_SIZE = 6;
+static const size_t MAX_SIZE = (~((size_t)0)) >> 1;
+static const double LOAD_FACTOR = 0.7;
+static const double GROW_FACTOR = 1.5;
+
 #define POSITION(x, r) ((x) % (r))
 
 struct STRMAP {
@@ -55,6 +58,7 @@ static const SM_ENTRY EMPTY = { 0, 0, 0 };
 
 static SM_ENTRY *find(const STRMAP * sm, const char *key, size_t hash);
 static void compress(STRMAP * sm, SM_ENTRY * entry);
+STRMAP *grow(STRMAP * sm);
 static size_t distance(const SM_ENTRY * from, const SM_ENTRY * to, size_t range);
 static size_t adjust(size_t x);
 
@@ -65,11 +69,12 @@ sm_create(size_t size)
     STRMAP *sm;
     size_t capacity, msize;
 
-    msize = (size >= MIN_SIZE ? size : MIN_SIZE);
+    msize = (size < MIN_SIZE ? MIN_SIZE : size);
+    msize = (msize > MAX_SIZE ? MAX_SIZE : msize);
     capacity = (size_t)(msize / LOAD_FACTOR);
     capacity = adjust(capacity);
 
-    /* check capcity > msize */
+    assert(msize < capacity);
 
     if (!(ht = (SM_ENTRY *) calloc(capacity, sizeof (SM_ENTRY)))) {
         errno = ENOMEM;
@@ -95,7 +100,8 @@ sm_create_from(const STRMAP * sm, size_t size)
     STRMAP *map;
 
     assert(sm);
-
+    
+    size = (size < sm->size ? sm->size : size);
     map = sm_create(size);
     if (!map) {
         return 0;
@@ -109,7 +115,7 @@ sm_create_from(const STRMAP * sm, size_t size)
             ++(map->size);
         }
     }
-
+    assert(map->size == sm->size);
     return map;
 }
 
@@ -122,16 +128,22 @@ sm_insert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
     assert(sm);
     assert(key);
 
-    if (sm->size == sm->msize) {
-        return SM_MAP_FULL;
-    }
-
     hash = poly_hashs(key);
     entry = find(sm, key, hash);
     if (!(entry->key)) {
+        if (sm->size == sm->msize) {
+            if (grow(sm)) {
+                entry = find(sm, key, hash);
+            }
+            else {
+                return SM_MAP_FULL;
+            }
+        }
+        
         entry->key = key;
         entry->data = data;
         entry->hash = hash;
+
         if (item) {
             *item = *entry;            
         }
@@ -336,6 +348,19 @@ sm_free(STRMAP * sm)
     free(sm);
 }
 
+size_t
+poly_hashs(const char *key)
+{
+    size_t hash = 0;
+
+    while (*key) {
+        hash += (hash << 8) + (unsigned char) (*key);
+        ++key;
+    }
+
+    return hash;
+}
+
 /*
  * private static functions
  */
@@ -415,19 +440,25 @@ compress(STRMAP * sm, SM_ENTRY * entry)
     }
 }
 
-size_t
-poly_hashs(const char *key)
-{
-    size_t hash = 0;
-
-    while (*key) {
-        hash += (hash << 8) + (unsigned char) (*key);
-        ++key;
+STRMAP *grow(STRMAP * sm) {
+    STRMAP *map;
+    
+    if (sm->size == MAX_SIZE) {
+        return 0;
+    }
+    
+    if (!(map = sm_create_from(sm, (sm->size) * GROW_FACTOR))) {
+       return 0; 
     }
 
-    return hash;
+    free(sm->ht);
+    sm->ht = map->ht;
+    sm->msize = map->msize;
+    sm->capacity = map->capacity;
+    free(map);
+    
+    return sm;
 }
 
-#undef MIN_SIZE
-#undef LOAD_FACTOR
+
 #undef POSITION

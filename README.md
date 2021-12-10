@@ -8,8 +8,9 @@
 ## Implementation
 
 - Open addressing with linear probing for collision resolution.
+- Auto grow feature.
 - Back shift key deletion algorithm.
-- `STRMAP *sm_create_from()` - creates new `strmap` from existing. Auto growing feature not implemented.
+- `STRMAP *sm_create_from()` - creates new `strmap` from existing.
 - `foreach` read-only keys iterator.
 - Probes mean, variance statistics.
 - String polynomial hash function

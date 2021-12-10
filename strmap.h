@@ -36,9 +36,11 @@
 #ifndef _STRMAP_H
 #define _STRMAP_H
 
+#include <stddef.h> /* size_t */
+
 #define STRMAP_VERSION_MAJOR 0
 #define STRMAP_VERSION_MINOR 4
-#define STRMAP_VERSION_PATCH 2
+#define STRMAP_VERSION_PATCH 3
 
 typedef struct STRMAP STRMAP;
 

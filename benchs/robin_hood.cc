@@ -89,7 +89,15 @@ int main(int argc, char **argv) {
   cout << "*** strmap test ***\n";
   cout << "*******************\n";
 
+#ifdef RESERVE
   ht = sm_create(MAP_SIZE);
+#else  
+  ht = sm_create(0);
+#endif    
+  if (!ht) {
+      exit(-1);
+  }
+  
   t1 = Clock::now();
   for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_insert(ht, keys[i].c_str(), &val, &rentry) != SM_INSERTED) {
@@ -100,7 +108,7 @@ int main(int argc, char **argv) {
   t2 = Clock::now();
   elapsed = t2 - t1;
   cout << "Insert: " << elapsed.count() << '\n';
-
+  cout << "Size: " << sm_size(ht) << '\n';
   cout << "Mean: " << sm_probes_mean(ht) << '\n';
   cout << "Variance: " << sm_probes_var(ht) << '\n';
 
@@ -200,6 +208,7 @@ int main(int argc, char **argv) {
   t2 = Clock::now();
   elapsed = t2 - t1;
   cout << "Remove: " << elapsed.count() << '\n';
+  cout << "Size: " << sm_size(ht) << '\n';  
 
   t1 = Clock::now();
   for (unsigned long i = 0; i < MAP_SIZE; i++) {
@@ -211,6 +220,7 @@ int main(int argc, char **argv) {
   t2 = Clock::now();
   elapsed = t2 - t1;
   cout << "Upsert removed: " << elapsed.count() << '\n';
+  cout << "Size: " << sm_size(ht) << '\n';  
 
   cout << "Mean: " << sm_probes_mean(ht) << '\n';
   cout << "Variance: " << sm_probes_var(ht) << '\n';
@@ -237,7 +247,10 @@ int main(int argc, char **argv) {
   cout << "***********************\n";
 
   robin_hood::unordered_set<string> strset;
+
+#ifdef RESERVE  
   strset.reserve(MAP_SIZE);
+#endif
 
   t1 = Clock::now();
   for (unsigned long i = 0; i < MAP_SIZE; i++) {
@@ -286,7 +299,10 @@ int main(int argc, char **argv) {
   cout << "*************************************\n";
 
   robin_hood::unordered_map<string, int> strmap;
+
+#ifdef RESERVE    
   strmap.reserve(MAP_SIZE);
+#endif  
 
   t1 = Clock::now();
   for (unsigned long i = 0; i < MAP_SIZE; i++) {
