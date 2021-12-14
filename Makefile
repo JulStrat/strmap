@@ -1,7 +1,7 @@
-CC  = gcc
-CXX = c++
+CC  = gcc -std=c89 -pedantic
+CXX = c++ -std=c++11
 #CXXFLAGS = -m32 -O2 -Wall -Wextra -Wconversion -Wshadow -pedantic
-CXXFLAGS = -O2 -Wall -Wextra -Wconversion -Wshadow -pedantic
+CXXFLAGS = -O2 -Wall -Wextra -Wconversion -Wshadow
 
 all: bench words robin_hood
 
@@ -24,7 +24,7 @@ words.o: benchs/words.cc
 	$(CXX) -c $(CXXFLAGS) -o words.o -I. benchs/words.cc
 
 strmap.o: strmap.c strmap.h
-	$(CC) -std=c89 -ansi -c $(CXXFLAGS) -o strmap.o strmap.c
+	$(CC) -c $(CXXFLAGS) -o strmap.o strmap.c
 
 clean:
 	rm *.o *.exe

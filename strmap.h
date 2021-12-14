@@ -39,8 +39,8 @@
 #include <stddef.h> /* size_t */
 
 #define STRMAP_VERSION_MAJOR 0
-#define STRMAP_VERSION_MINOR 4
-#define STRMAP_VERSION_PATCH 3
+#define STRMAP_VERSION_MINOR 5
+#define STRMAP_VERSION_PATCH 0
 
 typedef struct STRMAP STRMAP;
 
@@ -127,6 +127,7 @@ extern "C" {
 
     double sm_probes_mean(const STRMAP * sm);
     double sm_probes_var(const STRMAP * sm);
+    double sm_load_factor(const STRMAP * sm);
 
 /**
   @brief Remove all keys and free memory allocated for the map structure

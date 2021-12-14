@@ -1,4 +1,5 @@
 [![C/C++ CI](https://github.com/JulStrat/strmap/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/JulStrat/strmap/actions/workflows/c-cpp.yml)
+[![Build status](https://ci.appveyor.com/api/projects/status/yqx313bvqagokio0/branch/master?svg=true)](https://ci.appveyor.com/project/JulStrat/strmap/branch/master)
 [![GitHub license](https://img.shields.io/github/license/JulStrat/strmap)](https://github.com/JulStrat/strmap/blob/strmap/LICENSE)
 
 # strmap
@@ -30,7 +31,7 @@ Variance: 9.43266
 Load factor: 0.7 \
 Mean: 1.32653 \
 Variance: 14.8107
- 
+
 - `bench`: ASCII letters and digits permutations - 3700000 keys.
 
 Load factor: 0.7 \
@@ -44,7 +45,7 @@ Variance: 11.3293
 ```
 Create a string map which can contain at least `size` elements.
 ___
-   
+
 ``` C
     STRMAP *sm_create_from(const STRMAP * sm, size_t size);
 ```
@@ -79,12 +80,12 @@ ___
 ```
 Remove key
 
-Based on 
+Based on
 M. A. Kolosovskiy, ["Simple implementation of deletion from open-address hash table"](https://arxiv.org/ftp/arxiv/papers/0909/0909.2547.pdf).
 ___
 ``` C
     void sm_foreach(const STRMAP * sm, void (*action) (SM_ENTRY item, void *ctx), void *ctx);
-```    
+```
 For each callback.
 ___
 ``` C
@@ -94,7 +95,7 @@ Remove all keys.
 ___
 ``` C
     size_t sm_size(const STRMAP * sm);
-```    
+```
 Return number of keys.
 ___
 ``` C
@@ -104,11 +105,16 @@ ___
 Probes mean, variance.
 ___
 ``` C
+    double sm_load_factor(const STRMAP * sm);
+```
+Load factor.
+___
+``` C
     void sm_free(STRMAP * sm);
-```    
+```
 Remove all keys and free memory allocated for the map structure.
 ___
 ``` C
     size_t poly_hashs(const char *key);
-```    
+```
 String hash.

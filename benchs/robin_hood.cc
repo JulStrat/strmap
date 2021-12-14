@@ -109,6 +109,7 @@ int main(int argc, char **argv) {
   elapsed = t2 - t1;
   cout << "Insert: " << elapsed.count() << '\n';
   cout << "Size: " << sm_size(ht) << '\n';
+  cout << "Load factor: " << sm_load_factor(ht) << '\n';  
   cout << "Mean: " << sm_probes_mean(ht) << '\n';
   cout << "Variance: " << sm_probes_var(ht) << '\n';
 

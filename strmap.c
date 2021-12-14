@@ -339,6 +339,14 @@ sm_size(const STRMAP * sm)
     return sm->size;
 }
 
+double
+sm_load_factor(const STRMAP * sm)
+{
+    assert(sm);
+
+    return (double)sm->size / sm->capacity;
+}
+
 void
 sm_free(STRMAP * sm)
 {
