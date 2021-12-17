@@ -22,13 +22,10 @@ jobs:
     - name: words
       run: time ./words benchs/words.txt
     - name: robin_hood_1
-      run: time ./robin_hood 1000000
-    - name: robin_hood_2
-      run: time ./robin_hood 2000000
-    - name: robin_hood_3
-      run: time ./robin_hood 4000000
-    - name: robin_hood_4
       run: time ./robin_hood 8000000
-    - name: robin_hood_5
+    - name: robin_hood_2
       run: time ./robin_hood 16000000
-
+    - name: phmap_1
+      run: time ./phmap 8000000
+    - name: phmap_2
+      run: time ./phmap 16000000
