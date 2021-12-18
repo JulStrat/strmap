@@ -8,8 +8,8 @@ all: bench words robin_hood phmap test
 test: test.o strmap.o
 	$(CC) $(CXXFLAGS) -o test test.o strmap.o
 
-test.o: test/test.c
-	$(CC) -c $(CXXFLAGS) -o test.o -I. -Itest test/test.c
+test.o: tests/test.c
+	$(CC) -c $(CXXFLAGS) -o test.o -I. -Itests tests/test.c
 
 robin_hood: robin_hood.o strmap.o
 	$(CXX) $(CXXFLAGS) -o robin_hood robin_hood.o strmap.o
