@@ -17,6 +17,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: make
       run: make all
+    - name: test
+      run: ./test 1000000
     - name: bench
       run: time ./bench
     - name: words

@@ -1,9 +1,15 @@
-CC  = gcc -std=c89 -pedantic
+CC  = gcc -pedantic
 CXX = c++ -std=c++11
-#CXXFLAGS = -m32 -O2 -Wall -Wextra -Wconversion -Wshadow -pedantic
-CXXFLAGS = -O2 -Wall -Wextra -Wconversion -Wshadow
+#CXXFLAGS = -m32 -g -Wall -Wextra -Wconversion -Wshadow
+CXXFLAGS = -g -Wall -Wextra -Wconversion -Wshadow
 
-all: bench words robin_hood phmap
+all: bench words robin_hood phmap test
+
+test: test.o strmap.o
+	$(CC) $(CXXFLAGS) -o test test.o strmap.o
+
+test.o: test/test.c
+	$(CC) -c $(CXXFLAGS) -o test.o -I. -Itest test/test.c
 
 robin_hood: robin_hood.o strmap.o
 	$(CXX) $(CXXFLAGS) -o robin_hood robin_hood.o strmap.o
