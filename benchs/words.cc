@@ -214,46 +214,6 @@ int main(int argc, char **argv) {
   sm_free(ht);
 
   cout << "******************************\n";
-  cout << "*** STL unordered_set test ***\n";
-  cout << "******************************\n";
-
-  unordered_set<string> strset;
-  strset.reserve(keys.size());
-
-  t1 = Clock::now();
-  for (size_t i = 0; i < keys.size(); i++) {
-    strset.insert(keys[i]);
-  }
-  t2 = Clock::now();
-  elapsed = t2 - t1;
-  cout << "Insert STL unordered_set: " << elapsed.count() << '\n';
-  cout << "Load factor STL unordered_set: " << strset.load_factor() << '\n';
-
-  t1 = Clock::now();
-  for (size_t i = 0; i < keys.size(); i++) {
-    strset.find(keys[i]);
-  }
-  t2 = Clock::now();
-  elapsed = t2 - t1;
-  cout << "Lookup existing STL unordered_set: " << elapsed.count() << '\n';
-
-  t1 = Clock::now();
-  for (size_t i = 0; i < keys.size(); i++) {
-    strset.find(xkeys[i]);
-  }
-  t2 = Clock::now();
-  elapsed = t2 - t1;
-  cout << "Lookup not existing STL unordered_set: " << elapsed.count() << '\n';
-
-  t1 = Clock::now();
-  for (size_t i = 0; i < keys.size(); i++) {
-    strset.erase(keys[i]);
-  }
-  t2 = Clock::now();
-  elapsed = t2 - t1;
-  cout << "Remove: " << elapsed.count() << '\n';
-
-  cout << "******************************\n";
   cout << "*** STL unordered_map test ***\n";
   cout << "******************************\n";
 

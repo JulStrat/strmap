@@ -243,58 +243,6 @@ int main(int argc, char **argv) {
 
   sm_free(ht);
 
-  cout << "***********************\n";
-  cout << "*** robin_hood test ***\n";
-  cout << "***********************\n";
-
-  robin_hood::unordered_set<string> strset;
-
-#ifdef RESERVE  
-  strset.reserve(MAP_SIZE);
-#endif
-
-  t1 = Clock::now();
-  for (unsigned long i = 0; i < MAP_SIZE; i++) {
-    strset.insert(keys[i]);
-  }
-  t2 = Clock::now();
-  elapsed = t2 - t1;
-  cout << "Insert robin_hood unordered_set: " << elapsed.count() << '\n';
-  cout << "Load factor robin_hood unordered_set: " << strset.load_factor()
-       << '\n';
-
-  t1 = Clock::now();
-  for (unsigned long i = 0; i < MAP_SIZE; i++) {
-    if (strset.find(keys[i]) == strset.end()) {
-      cout << "Key not found!" << i << '-' << keys[i] << '\n';
-      break;
-    }
-  }
-  t2 = Clock::now();
-  elapsed = t2 - t1;
-  cout << "Lookup existing robin_hood unordered_set: " << elapsed.count()
-       << '\n';
-
-  t1 = Clock::now();
-  for (unsigned long i = 0; i < MAP_SIZE; i++) {
-    if (strset.find(xkeys[i]) != strset.end()) {
-      cout << "Not existing key found!" << '\n';
-      break;
-    }
-  }
-  t2 = Clock::now();
-  elapsed = t2 - t1;
-  cout << "Lookup not existing robin_hood unordered_set: " << elapsed.count()
-       << '\n';
-
-  t1 = Clock::now();
-  for (unsigned long i = 0; i < MAP_SIZE; i++) {
-    strset.erase(keys[i]);
-  }
-  t2 = Clock::now();
-  elapsed = t2 - t1;
-  cout << "Remove: " << elapsed.count() << '\n';
-
   cout << "*************************************\n";
   cout << "*** robin_hood unordered_map test ***\n";
   cout << "*************************************\n";
