@@ -196,7 +196,12 @@ sm_upsert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
         return SM_UPDATED;
     }
     if (sm->size == sm->msize) {
-        return SM_MAP_FULL;
+        if (grow(sm)) {
+            entry = find(sm, key, hash);
+        }
+        else {
+            return SM_MAP_FULL;
+        }
     }
     entry->key = key;
     entry->data = data;
@@ -206,7 +211,7 @@ sm_upsert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
     }
     ++(sm->size);
 
-    return SM_UPDATED;
+    return SM_INSERTED;
 }
 
 SM_RESULT

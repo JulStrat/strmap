@@ -60,6 +60,9 @@ INSERT_1() {
   for (i = 0; i < MAP_SIZE; i++) {
     ASSERT(sm_insert(ht, keys[i], 0, 0) == SM_INSERTED);
     ASSERT(sm_size(ht) == i + 1);
+    ASSERT(sm_lookup(ht, keys[i], 0) == SM_FOUND);
+    ASSERT(sm_insert(ht, keys[i], 0, 0) == SM_DUPLICATE);    
+    ASSERT(sm_size(ht) == i + 1);    
   }
 
   sm_free(ht);
@@ -67,7 +70,33 @@ INSERT_1() {
 }    
 
 TEST
-INSERT_2() {
+UPSERT_1() {
+  STRMAP *ht;
+  unsigned long i;  
+
+#ifdef RESERVE
+  ht = sm_create(MAP_SIZE);
+#else  
+  ht = sm_create(0);
+#endif    
+  if (!ht) {
+      FAIL();
+  }
+
+  for (i = 0; i < MAP_SIZE; i++) {
+    ASSERT(sm_upsert(ht, keys[i], 0, 0) == SM_INSERTED);
+    ASSERT(sm_size(ht) == i + 1);
+    ASSERT(sm_lookup(ht, keys[i], 0) == SM_FOUND);
+    ASSERT(sm_upsert(ht, keys[i], 0, 0) == SM_UPDATED);    
+    ASSERT(sm_size(ht) == i + 1);    
+  }
+
+  sm_free(ht);
+  PASS();
+}    
+
+TEST
+REMOVE_1() {
   STRMAP *ht;
   unsigned long i;  
 
@@ -82,23 +111,26 @@ INSERT_2() {
 
   for (i = 0; i < MAP_SIZE; i++) {
     ASSERT(sm_insert(ht, keys[i], 0, 0) == SM_INSERTED);
-    ASSERT(sm_size(ht) == i + 1);
+    ASSERT(sm_size(ht) == 1);
     ASSERT(sm_lookup(ht, keys[i], 0) == SM_FOUND);
+    ASSERT(sm_remove(ht, keys[i], 0) == SM_REMOVED);    
+    ASSERT(sm_size(ht) == 0);    
+    ASSERT(sm_remove(ht, keys[i], 0) == SM_NOT_FOUND);        
   }
 
   sm_free(ht);
   PASS();
 }    
 
+
 GREATEST_MAIN_DEFS();
 int main(int argc, char **argv) {
-  GREATEST_MAIN_BEGIN();  
-  
   char str[]  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   char xstr[] = "ZbcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  
   unsigned long i;  
   char *ptr;  
+    
+  GREATEST_MAIN_BEGIN();  
 
   if (argc > 1) {
     MAP_SIZE = strtoul(argv[1], &ptr, 10);
@@ -118,7 +150,8 @@ int main(int argc, char **argv) {
   }
 
   RUN_TEST(INSERT_1);
-  RUN_TEST(INSERT_2);
+  RUN_TEST(UPSERT_1);  
+  RUN_TEST(REMOVE_1);    
   
   free(keys);
   free(xkeys);

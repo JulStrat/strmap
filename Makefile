@@ -1,4 +1,4 @@
-CC  = gcc -pedantic
+CC  = gcc -ansi -pedantic
 CXX = c++ -std=c++11
 #CXXFLAGS = -m32 -g -Wall -Wextra -Wconversion -Wshadow
 CXXFLAGS = -g -Wall -Wextra -Wconversion -Wshadow
