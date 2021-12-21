@@ -39,6 +39,7 @@
 #include <errno.h>
 
 #include "strmap.h"
+#define SM_ORDERED        
 
 static const size_t MIN_SIZE = 6;
 static const size_t MAX_SIZE = (~((size_t)0)) >> 1;
@@ -61,6 +62,8 @@ static void compress(STRMAP * sm, SM_ENTRY * entry);
 STRMAP *grow(STRMAP * sm);
 static size_t distance(const SM_ENTRY * from, const SM_ENTRY * to, size_t range);
 static size_t adjust(size_t x);
+int same_chain(size_t ahash, size_t bhash, size_t range);
+void order(STRMAP * sm, SM_ENTRY * start, SM_ENTRY * end);
 
 STRMAP *
 sm_create(size_t size)
@@ -148,6 +151,10 @@ sm_insert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
             *item = *entry;            
         }
         ++(sm->size);
+
+#ifdef SM_ORDERED        
+        order(sm, sm->ht + POSITION(hash, sm->capacity), entry);
+#endif        
 
         return SM_INSERTED;
     }
@@ -453,7 +460,8 @@ compress(STRMAP * sm, SM_ENTRY * entry)
     }
 }
 
-STRMAP *grow(STRMAP * sm) {
+STRMAP *
+grow(STRMAP * sm) {
     STRMAP *map;
     
     if (sm->size == MAX_SIZE) {
@@ -473,5 +481,34 @@ STRMAP *grow(STRMAP * sm) {
     return sm;
 }
 
+int 
+same_chain(size_t ahash, size_t bhash, size_t range) {
+    size_t d = ahash >= bhash ? ahash - bhash : bhash - ahash;
+    
+    return d % range ? 0 : 1;
+}
+
+void
+order(STRMAP * sm, SM_ENTRY * start, SM_ENTRY * end)
+{
+    SM_ENTRY *stop, t;
+
+    stop = sm->ht + sm->capacity;
+
+    while (start != end) {
+        /* if curr entry hash great than last then swap */
+        if (same_chain(start->hash, end->hash, sm->capacity)) {
+            if (start->hash > end->hash) {
+                t = *end;
+                *end = *start;
+                *start = t;
+            }
+        }
+        
+        if (++start == stop) {
+            start = sm->ht;
+        }
+    }
+}
 
 #undef POSITION

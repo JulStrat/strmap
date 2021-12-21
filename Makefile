@@ -1,15 +1,12 @@
 CC  = gcc -ansi -pedantic
-CXX = c++ -std=c++11
-#CXXFLAGS = -m32 -g -Wall -Wextra -Wconversion -Wshadow
-CXXFLAGS = -g -Wall -Wextra -Wconversion -Wshadow
+CXX = c++ -std=c++11 -O2 -DNEDEBUG
+#CXXFLAGS = -m32 -Wall -Wextra -Wconversion -Wshadow
+CXXFLAGS = -Wall -Wextra -Wconversion -Wshadow
 
 all: bench words robin_hood phmap test
 
-test: test.o strmap.o
-	$(CC) $(CXXFLAGS) -o test test.o strmap.o
-
-test.o: tests/test.c
-	$(CC) -c $(CXXFLAGS) -o test.o -I. -Itests tests/test.c
+test: tests/test.c strmap.c
+	$(CC) -g $(CXXFLAGS) -o test -I. -Itests tests/test.c strmap.c
 
 robin_hood: robin_hood.o strmap.o
 	$(CXX) $(CXXFLAGS) -o robin_hood robin_hood.o strmap.o
@@ -36,7 +33,7 @@ words.o: benchs/words.cc
 	$(CXX) -c $(CXXFLAGS) -o words.o -I. benchs/words.cc
 
 strmap.o: strmap.c strmap.h
-	$(CC) -c $(CXXFLAGS) -o strmap.o strmap.c
+	$(CC) -O2 -c $(CXXFLAGS) -o strmap.o strmap.c
 
 clean:
 	rm *.o *.exe
