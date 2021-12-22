@@ -30,7 +30,7 @@
   @brief STRMAP - simple alternative to hcreate_r, hdestroy_r, hsearch_r GNU extensions
   @author I. Kakoulidis  
   @date 2021
-  @license Public Domain
+  @license The Unlicense  
 */
 
 #ifndef _STRMAP_H

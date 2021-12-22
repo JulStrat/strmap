@@ -30,7 +30,7 @@
   @brief STRMAP - simple alternative to hcreate_r, hdestroy_r, hsearch_r GNU extensions
   @author I. Kakoulidis
   @date 2021
-  @license Public Domain
+  @license The Unlicense
 */
 
 #include <stdlib.h>
@@ -45,8 +45,6 @@ static const size_t MAX_SIZE = (~((size_t)0)) >> 1;
 static const double LOAD_FACTOR = 0.7;
 static const double GROW_FACTOR = 1.5;
 
-#define POSITION(x, r) ((x) % (r))
-
 struct STRMAP {
     size_t capacity;            /* number of allocated entries */
     size_t size;                /* number of keys in map */
@@ -60,6 +58,7 @@ static SM_ENTRY *find(const STRMAP * sm, const char *key, size_t hash);
 static void compress(STRMAP * sm, SM_ENTRY * entry);
 STRMAP *grow(STRMAP * sm);
 static size_t distance(const SM_ENTRY * from, const SM_ENTRY * to, size_t range);
+static size_t POSITION(size_t x, size_t range);
 static size_t adjust(size_t x);
 
 STRMAP *
@@ -382,6 +381,11 @@ static size_t
 distance(const SM_ENTRY * from, const SM_ENTRY * to, size_t range)
 {
     return to >= from ? to - from : range - (from - to);
+}
+
+static size_t 
+POSITION(size_t x, size_t range) {
+    return x % range;
 }
 
 static size_t
