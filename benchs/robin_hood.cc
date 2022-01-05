@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   int uval = 7117;
   // pointer for lookup
   // int *data;
-  // size_t csize;
+  size_t csize, max_probe;
 
   // STRMAP *nht;
   STRMAP *ht;
@@ -110,7 +110,8 @@ int main(int argc, char **argv) {
   cout << "Insert: " << elapsed.count() << '\n';
   cout << "Size: " << sm_size(ht) << '\n';
   cout << "Load factor: " << sm_load_factor(ht) << '\n';  
-  cout << "Mean: " << sm_probes_mean(ht) << '\n';
+  cout << "Mean: " << sm_probes_mean(ht, &max_probe) << '\n';
+  cout << "Max: " << max_probe << '\n';    
   cout << "Variance: " << sm_probes_var(ht) << '\n';
 
   t1 = Clock::now();
@@ -223,7 +224,8 @@ int main(int argc, char **argv) {
   cout << "Upsert removed: " << elapsed.count() << '\n';
   cout << "Size: " << sm_size(ht) << '\n';  
 
-  cout << "Mean: " << sm_probes_mean(ht) << '\n';
+  cout << "Mean: " << sm_probes_mean(ht, &max_probe) << '\n';
+  cout << "Max: " << max_probe << '\n';    
   cout << "Variance: " << sm_probes_var(ht) << '\n';
 
   t1 = Clock::now();

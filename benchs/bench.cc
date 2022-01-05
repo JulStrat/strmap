@@ -31,7 +31,8 @@ void check_hash(SM_ENTRY item, void *ctx) {
   }
 }
 
-int main() {
+int main(int argc, char **argv) {
+  unsigned long MAP_SIZE = 1024*1024;  
   string str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   string xstr =
       "ZbcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -49,13 +50,15 @@ int main() {
   int uval = 7117;
   // pointer for lookup
   // int *data;
-  size_t csize;
+  size_t csize, max_probe;
 
   STRMAP *nht;
   STRMAP *ht;
+  
+  MAP_SIZE = strtoul(argv[1], 0, 10);
 
   auto t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     // random_shuffle(str.begin(), str.end());
     fisher_yates_shuffle((char *)str.c_str());
     keys.push_back(str);
@@ -65,7 +68,7 @@ int main() {
   cout << "Generate keys: " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     // random_shuffle(xstr.begin(), xstr.end());
     fisher_yates_shuffle((char *)xstr.c_str());
     xkeys.push_back(xstr);
@@ -75,7 +78,7 @@ int main() {
   cout << "Generate not existing keys: " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     poly_hashs(keys[i].c_str());
   }
   t2 = Clock::now();
@@ -86,10 +89,11 @@ int main() {
   cout << "*** strmap test ***\n";
   cout << "*******************\n";
 
+/*
   for (csize = 1000; csize <= 2048000; csize += csize) {
     ht = sm_create(csize);
     t1 = Clock::now();
-    for (int i = 0; i < csize; i++) {
+    for (unsigned long i = 0; i < csize; i++) {
       if (sm_insert(ht, keys[i].c_str(), &val, &rentry) != SM_INSERTED) {
         cout << "Error: " << keys[i].c_str() << '\n';
         break;
@@ -104,10 +108,11 @@ int main() {
     cout << "*******************\n";
     sm_free(ht);
   }
+*/
 
-  ht = sm_create(3700000);
+  ht = sm_create(MAP_SIZE);
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_insert(ht, keys[i].c_str(), &val, &rentry) != SM_INSERTED) {
       cout << "Error: " << keys[i].c_str() << '\n';
       break;
@@ -117,11 +122,12 @@ int main() {
   elapsed = t2 - t1;
   cout << "Insert: " << elapsed.count() << '\n';
 
-  cout << "Mean: " << sm_probes_mean(ht) << '\n';
+  cout << "Mean: " << sm_probes_mean(ht, &max_probe) << '\n';
+  cout << "Max: " << max_probe << '\n';  
   cout << "Variance: " << sm_probes_var(ht) << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_lookup(ht, keys[i].c_str(), &rentry) != SM_FOUND) {
       cout << "Error: " << keys[i] << '\n';
       break;
@@ -136,7 +142,7 @@ int main() {
   cout << "Lookup existing: " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_lookup(ht, xkeys[i].c_str(), &rentry) != SM_NOT_FOUND) {
       cout << "Error: " << xkeys[i] << '\n';
       ;
@@ -148,14 +154,15 @@ int main() {
   cout << "Lookup not existing: " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  nht = sm_create_from(ht, 5000000);
+  nht = sm_create_from(ht, 1.5*MAP_SIZE);
   sm_free(ht);
   ht = nht;
   t2 = Clock::now();
   elapsed = t2 - t1;
   cout << "Create from: " << elapsed.count() << '\n';
 
-  cout << "Mean: " << sm_probes_mean(ht) << '\n';
+  cout << "Mean: " << sm_probes_mean(ht, &max_probe) << '\n';
+  cout << "Max: " << max_probe << '\n';    
   cout << "Variance: " << sm_probes_var(ht) << '\n';
 
   t1 = Clock::now();
@@ -165,7 +172,7 @@ int main() {
   cout << "Foreach check_hash(): " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_lookup(ht, keys[i].c_str(), &rentry) != SM_FOUND) {
       cout << "Error: " << keys[i] << '\n';
       break;
@@ -180,7 +187,7 @@ int main() {
   cout << "Lookup existing: " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_update(ht, keys[i].c_str(), &uval, &rentry) == SM_NOT_FOUND) {
       cout << "Error: " << keys[i].c_str() << '\n';
       break;
@@ -191,7 +198,7 @@ int main() {
   cout << "Update existing: " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_lookup(ht, keys[i].c_str(), &rentry) != SM_FOUND) {
       cout << "Error: " << keys[i] << '\n';
       break;
@@ -206,7 +213,7 @@ int main() {
   cout << "Lookup updated: " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_lookup(ht, xkeys[i].c_str(), &rentry) != SM_NOT_FOUND) {
       cout << "Error: " << xkeys[i] << '\n';
       ;
@@ -218,7 +225,7 @@ int main() {
   cout << "Lookup not existing: " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3000000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_remove(ht, keys[i].c_str(), &rentry) != SM_REMOVED) {
       cout << keys[i];
       break;
@@ -228,12 +235,9 @@ int main() {
   elapsed = t2 - t1;
   cout << "Remove: " << elapsed.count() << '\n';
 
-  cout << "Mean: " << sm_probes_mean(ht) << '\n';
-  cout << "Variance: " << sm_probes_var(ht) << '\n';
-
   t1 = Clock::now();
-  for (int i = 0; i < 3000000; i++) {
-    if (sm_upsert(ht, keys[i].c_str(), (void *)&uval, &rentry) == SM_MAP_FULL) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
+    if (sm_upsert(ht, keys[i].c_str(), (void *)&uval, &rentry) != SM_INSERTED) {
       cout << "Error: " << keys[i].c_str() << '\n';
       break;
     }
@@ -242,11 +246,38 @@ int main() {
   elapsed = t2 - t1;
   cout << "Upsert removed: " << elapsed.count() << '\n';
 
-  cout << "Mean: " << sm_probes_mean(ht) << '\n';
+  cout << "Mean: " << sm_probes_mean(ht, &max_probe) << '\n';
+  cout << "Max: " << max_probe << '\n';    
   cout << "Variance: " << sm_probes_var(ht) << '\n';
 
+
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  //for (unsigned long i = 0; i < MAP_SIZE; i++) {
+  for (unsigned long i = MAP_SIZE - 1; i > 0; i--) {
+    //cout << i << " - " << keys[i] << '\n';      
+    if (sm_remove(ht, keys[i].c_str(), &rentry) != SM_REMOVED) {
+      cout << keys[i];
+      break;
+    }
+  }
+  t2 = Clock::now();
+  elapsed = t2 - t1;
+  cout << "Remove in reversed order: " << elapsed.count() << '\n';
+
+  t1 = Clock::now();
+  for (unsigned long i = 1; i < MAP_SIZE; i++) {
+    if (sm_upsert(ht, keys[i].c_str(), (void *)&uval, &rentry) != SM_INSERTED) {
+      cout << "Error: " << keys[i].c_str() << '\n';
+      break;
+    }
+  }
+  t2 = Clock::now();
+  elapsed = t2 - t1;
+  cout << "Upsert removed: " << elapsed.count() << '\n';
+
+
+  t1 = Clock::now();
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_lookup(ht, keys[i].c_str(), &rentry) != SM_FOUND) {
       cout << "Error: " << keys[i] << '\n';
       break;
@@ -267,10 +298,10 @@ int main() {
   cout << "******************************\n";
 
   unordered_map<string, int> strmap;
-  strmap.reserve(3700000);
+  strmap.reserve(MAP_SIZE);
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     strmap.insert(make_pair(keys[i], 0));
   }
   t2 = Clock::now();
@@ -279,7 +310,7 @@ int main() {
   cout << "Load factor STL unordered_map: " << strmap.load_factor() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     strmap.find(keys[i]);
   }
   t2 = Clock::now();
@@ -287,7 +318,7 @@ int main() {
   cout << "Lookup existing STL unordered_map: " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3700000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     strmap.find(xkeys[i]);
   }
   t2 = Clock::now();
@@ -295,7 +326,7 @@ int main() {
   cout << "Lookup not existing STL unordered_map: " << elapsed.count() << '\n';
 
   t1 = Clock::now();
-  for (int i = 0; i < 3000000; i++) {
+  for (unsigned long i = 0; i < MAP_SIZE; i++) {
     strmap.erase(keys[i]);
   }
   t2 = Clock::now();

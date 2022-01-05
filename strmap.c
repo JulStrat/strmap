@@ -39,14 +39,14 @@
 #include <errno.h>
 
 #include "strmap.h"
+/* 
 #define SM_ORDERED        
+*/
 
 static const size_t MIN_SIZE = 6;
 static const size_t MAX_SIZE = (~((size_t)0)) >> 1;
 static const double LOAD_FACTOR = 0.7;
 static const double GROW_FACTOR = 1.5;
-
-#define POSITION(x, r) ((x) % (r))
 
 struct STRMAP {
     size_t capacity;            /* number of allocated entries */
@@ -57,10 +57,12 @@ struct STRMAP {
 
 static const SM_ENTRY EMPTY = { 0, 0, 0 };
 
+static size_t DISTANCE(const SM_ENTRY * from, const SM_ENTRY * to, size_t capacity);
+static size_t HOME(size_t x, size_t capacity);
+
 static SM_ENTRY *find(const STRMAP * sm, const char *key, size_t hash);
 static void compress(STRMAP * sm, SM_ENTRY * entry);
 STRMAP *grow(STRMAP * sm);
-static size_t distance(const SM_ENTRY * from, const SM_ENTRY * to, size_t range);
 static size_t adjust(size_t x);
 int same_chain(size_t ahash, size_t bhash, size_t range);
 void order(STRMAP * sm, SM_ENTRY * start, SM_ENTRY * end);
@@ -153,7 +155,7 @@ sm_insert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
         ++(sm->size);
 
 #ifdef SM_ORDERED        
-        order(sm, sm->ht + POSITION(hash, sm->capacity), entry);
+        order(sm, sm->ht + HOME(hash, sm->capacity), entry);
 #endif        
 
         return SM_INSERTED;
@@ -283,9 +285,10 @@ sm_foreach(const STRMAP * sm, void (*action) (SM_ENTRY item, void *ctx), void *c
 }
 
 double
-sm_probes_mean(const STRMAP * sm)
+sm_probes_mean(const STRMAP * sm, size_t *max_probes)
 {
     SM_ENTRY *entry, *root, *stop;
+    size_t dist, max_dist;
     double mean;
 
     assert(sm);
@@ -293,15 +296,22 @@ sm_probes_mean(const STRMAP * sm)
     if (!sm->size) {
         return 0.0;
     }
-
+    max_dist = 0;
     stop = sm->ht + sm->capacity;
     for (mean = 0.0, entry = sm->ht; entry != stop; ++entry) {
         if (entry->key) {
-            root = sm->ht + POSITION(entry->hash, sm->capacity);
-            mean += (double)distance(root, entry, sm->capacity);
+            root = sm->ht + HOME(entry->hash, sm->capacity);
+            dist = DISTANCE(root, entry, sm->capacity);
+            if (dist > max_dist) {
+                max_dist = dist;
+            }
+            mean += (double)dist;
         }
     }
-
+    
+    if (max_probes) {
+        *max_probes = max_dist;
+    }
     return mean / (double)sm->size;
 }
 
@@ -317,12 +327,12 @@ sm_probes_var(const STRMAP * sm)
         return 0.0;
     }
 
-    mean = sm_probes_mean(sm);
+    mean = sm_probes_mean(sm, 0);
     stop = sm->ht + sm->capacity;    
     for (var = 0.0, entry = sm->ht; entry != stop; ++entry) {
         if (entry->key) {
-            root = sm->ht + POSITION(entry->hash, sm->capacity);
-            diff = mean - (double)distance(root, entry, sm->capacity);
+            root = sm->ht + HOME(entry->hash, sm->capacity);
+            diff = mean - (double)DISTANCE(root, entry, sm->capacity);
             var += diff * diff;
         }
     }
@@ -386,9 +396,13 @@ poly_hashs(const char *key)
  */
 
 static size_t
-distance(const SM_ENTRY * from, const SM_ENTRY * to, size_t range)
+DISTANCE(const SM_ENTRY * from, const SM_ENTRY * to, size_t capacity)
 {
-    return to >= from ? to - from : range - (from - to);
+    return to >= from ? to - from : capacity - (from - to);
+}
+
+static size_t HOME(size_t x, size_t capacity) {
+    return x % capacity;
 }
 
 static size_t
@@ -415,10 +429,11 @@ SM_ENTRY *
 find(const STRMAP * sm, const char *key, size_t hash)
 {
     SM_ENTRY *entry, *stop;
+    size_t i;
 
-    entry = sm->ht + POSITION(hash, sm->capacity);
+    entry = sm->ht + HOME(hash, sm->capacity);
     stop = sm->ht + sm->capacity;
-
+    
     while (entry->key) {
         if (hash == entry->hash) {
             if (!strcmp(key, entry->key)) {
@@ -446,9 +461,9 @@ compress(STRMAP * sm, SM_ENTRY * entry)
     }
 
     while (entry->key) {
-        root = sm->ht + POSITION(entry->hash, sm->capacity);
-        if (distance(root, entry, sm->capacity) >=
-            distance(empty, entry, sm->capacity)) {
+        root = sm->ht + HOME(entry->hash, sm->capacity);
+        if (DISTANCE(root, entry, sm->capacity) >=
+            DISTANCE(empty, entry, sm->capacity)) {
             /* swap current entry with empty */
             *empty = *entry;
             *entry = EMPTY;
@@ -510,5 +525,3 @@ order(STRMAP * sm, SM_ENTRY * start, SM_ENTRY * end)
         }
     }
 }
-
-#undef POSITION

@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
   int uval = 7117;
   // pointer for lookup
   // int *data;
-  size_t csize;
+  size_t csize, max_probe;
 
   STRMAP *nht;
   STRMAP *ht;
@@ -105,7 +105,8 @@ int main(int argc, char **argv) {
   elapsed = t2 - t1;
   cout << "Insert " << sm_size(ht) << " keys: " << elapsed.count() << '\n';
 
-  cout << "Mean: " << sm_probes_mean(ht) << '\n';
+  cout << "Mean: " << sm_probes_mean(ht, &max_probe) << '\n';
+  cout << "Max: " << max_probe << '\n';    
   cout << "Variance: " << sm_probes_var(ht) << '\n';
 
   t1 = Clock::now();
@@ -179,7 +180,8 @@ int main(int argc, char **argv) {
   elapsed = t2 - t1;
   cout << "Remove: " << elapsed.count() << '\n';
 
-  cout << "Mean: " << sm_probes_mean(ht) << '\n';
+  cout << "Mean: " << sm_probes_mean(ht, &max_probe) << '\n';
+  cout << "Max: " << max_probe << '\n';    
   cout << "Variance: " << sm_probes_var(ht) << '\n';
 
   t1 = Clock::now();
@@ -193,7 +195,8 @@ int main(int argc, char **argv) {
   elapsed = t2 - t1;
   cout << "Upsert removed: " << elapsed.count() << '\n';
 
-  cout << "Mean: " << sm_probes_mean(ht) << '\n';
+  cout << "Mean: " << sm_probes_mean(ht, &max_probe) << '\n';
+  cout << "Max: " << max_probe << '\n';    
   cout << "Variance: " << sm_probes_var(ht) << '\n';
 
   t1 = Clock::now();

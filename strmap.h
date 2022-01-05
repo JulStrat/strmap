@@ -125,7 +125,7 @@ extern "C" {
 */
     size_t sm_size(const STRMAP * sm);
 
-    double sm_probes_mean(const STRMAP * sm);
+    double sm_probes_mean(const STRMAP * sm, size_t *max_probes);
     double sm_probes_var(const STRMAP * sm);
     double sm_load_factor(const STRMAP * sm);
 
