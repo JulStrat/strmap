@@ -45,7 +45,7 @@
 
 static const size_t MIN_SIZE = 6;
 static const size_t MAX_SIZE = (~((size_t)0)) >> 1;
-static const double LOAD_FACTOR = 0.7;
+static const double LOAD_FACTOR = 0.75;
 static const double GROW_FACTOR = 1.5;
 
 struct STRMAP {
