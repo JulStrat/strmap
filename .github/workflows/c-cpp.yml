@@ -22,7 +22,7 @@ jobs:
     - name: test_2
       run: ./test 2000000
     - name: bench
-      run: time ./bench
+      run: time ./bench 8000000
     - name: words
       run: time ./words benchs/words.txt
     - name: robin_hood_1
