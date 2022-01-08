@@ -26,7 +26,7 @@ using namespace std;
 
 // sm_foreach callback
 void check_hash(SM_ENTRY item, void *ctx) {
-  if (poly_hashs(item.key) != item.hash) {
+  if (djb_hashs(item.key) != item.hash) {
     cout << "Hash error: " << item.hash << '\n';
   }
 }
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
   }
 */
 
-  ht = sm_create(MAP_SIZE);
+  ht = sm_create(MAP_SIZE, djb_hashs);
   t1 = Clock::now();
   for (unsigned long i = 0; i < MAP_SIZE; i++) {
     if (sm_insert(ht, keys[i].c_str(), &val, &rentry) != SM_INSERTED) {

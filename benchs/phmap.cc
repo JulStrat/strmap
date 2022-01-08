@@ -90,9 +90,9 @@ int main(int argc, char **argv) {
   cout << "*******************\n";
 
 #ifdef RESERVE
-  ht = sm_create(MAP_SIZE);
+  ht = sm_create(MAP_SIZE, 0);
 #else  
-  ht = sm_create(0);
+  ht = sm_create(0, 0);
 #endif    
   if (!ht) {
       exit(-1);

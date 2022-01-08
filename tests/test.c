@@ -49,9 +49,9 @@ INSERT_1() {
   unsigned long i;  
 
 #ifdef RESERVE
-  ht = sm_create(MAP_SIZE);
+  ht = sm_create(MAP_SIZE, 0);
 #else  
-  ht = sm_create(0);
+  ht = sm_create(0, 0);
 #endif    
   if (!ht) {
       FAIL();
@@ -75,9 +75,9 @@ UPSERT_1() {
   unsigned long i;  
 
 #ifdef RESERVE
-  ht = sm_create(MAP_SIZE);
+  ht = sm_create(MAP_SIZE, 0);
 #else  
-  ht = sm_create(0);
+  ht = sm_create(0, 0);
 #endif    
   if (!ht) {
       FAIL();
@@ -101,9 +101,9 @@ REMOVE_1() {
   unsigned long i;  
 
 #ifdef RESERVE
-  ht = sm_create(MAP_SIZE);
+  ht = sm_create(MAP_SIZE, 0);
 #else  
-  ht = sm_create(0);
+  ht = sm_create(0, 0);
 #endif    
   if (!ht) {
       FAIL();

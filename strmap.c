@@ -52,6 +52,7 @@ struct STRMAP {
     size_t capacity;            /* number of allocated entries */
     size_t size;                /* number of keys in map */
     size_t msize;               /* max size */
+    size_t (*hash_func)(const char *key);
     SM_ENTRY *ht;
 };
 
@@ -60,15 +61,19 @@ static const SM_ENTRY EMPTY = { 0, 0, 0 };
 static size_t DISTANCE(const SM_ENTRY * from, const SM_ENTRY * to, size_t capacity);
 static size_t HOME(size_t x, size_t capacity);
 
-static SM_ENTRY *find(const STRMAP * sm, const char *key, size_t hash);
+SM_RESULT rh_find(const STRMAP * sm, const char *key,
+                  size_t hash, SM_ENTRY **item);
+
+SM_ENTRY *rh_insert(const STRMAP * sm, SM_ENTRY item, SM_ENTRY *entry);
+
 static void compress(STRMAP * sm, SM_ENTRY * entry);
+
 STRMAP *grow(STRMAP * sm);
+
 static size_t adjust(size_t x);
-int same_chain(size_t ahash, size_t bhash, size_t range);
-void order(STRMAP * sm, SM_ENTRY * start, SM_ENTRY * end);
 
 STRMAP *
-sm_create(size_t size)
+sm_create(size_t size, size_t (*hash_func)(const char *key))
 {
     SM_ENTRY *ht;
     STRMAP *sm;
@@ -77,7 +82,9 @@ sm_create(size_t size)
     msize = (size < MIN_SIZE ? MIN_SIZE : size);
     msize = (msize > MAX_SIZE ? MAX_SIZE : msize);
     capacity = (size_t)(msize / LOAD_FACTOR);
+
     capacity = adjust(capacity);
+
 
     assert(msize < capacity);
 
@@ -89,6 +96,12 @@ sm_create(size_t size)
         sm->size = 0;
         sm->msize = msize;
         sm->capacity = capacity;
+        if (hash_func) {
+            sm->hash_func = hash_func;
+        }
+        else {
+            sm->hash_func = poly_hashs;
+        }
         sm->ht = ht;
     } else {
         free(ht);
@@ -102,12 +115,13 @@ STRMAP *
 sm_create_from(const STRMAP * sm, size_t size)
 {
     SM_ENTRY *item, *entry, *stop;
+    SM_RESULT r;
     STRMAP *map;
 
     assert(sm);
     
     size = (size < sm->size ? sm->size : size);
-    map = sm_create(size);
+    map = sm_create(size, sm->hash_func);
     if (!map) {
         return 0;
     }
@@ -115,8 +129,8 @@ sm_create_from(const STRMAP * sm, size_t size)
     stop = sm->ht + sm->capacity;
     for (item = sm->ht; item != stop; ++item) {
         if (item->key) {
-            entry = find(map, item->key, item->hash);
-            *entry = *item;
+            r = rh_find(map, item->key, item->hash, &entry);
+			entry = rh_insert(map, *item, entry);
             ++(map->size);
         }
     }
@@ -127,37 +141,38 @@ sm_create_from(const STRMAP * sm, size_t size)
 SM_RESULT
 sm_insert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 {
-    SM_ENTRY *entry;
+    SM_ENTRY *entry, tmp;
+    SM_RESULT r;
     size_t hash;
 
     assert(sm);
     assert(key);
 
-    hash = poly_hashs(key);
-    entry = find(sm, key, hash);
-    if (!(entry->key)) {
+    hash = (sm->hash_func)(key);
+    r = rh_find(sm, key, hash, &entry);
+
+    if (r == SM_NOT_FOUND) {
         if (sm->size == sm->msize) {
             if (grow(sm)) {
-                entry = find(sm, key, hash);
+                r = rh_find(sm, key, hash, &entry);
             }
             else {
                 return SM_MAP_FULL;
             }
         }
-        
+        tmp.key = key;
+		tmp.data = data;
+		tmp.hash = hash;
+		entry = rh_insert(sm, tmp, entry);
+		/*
         entry->key = key;
         entry->data = data;
         entry->hash = hash;
-
+		*/
         if (item) {
             *item = *entry;            
         }
         ++(sm->size);
-
-#ifdef SM_ORDERED        
-        order(sm, sm->ht + HOME(hash, sm->capacity), entry);
-#endif        
-
         return SM_INSERTED;
     }
 
@@ -168,14 +183,16 @@ SM_RESULT
 sm_update(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
+    SM_RESULT r;
     size_t hash;
 
     assert(sm);
     assert(key);
 
-    hash = poly_hashs(key);
-    entry = find(sm, key, hash);
-    if (entry->key) {
+    hash = (sm->hash_func)(key);
+    r = rh_find(sm, key, hash, &entry);
+
+    if (r == SM_FOUND) {
         if (item) {
             *item = *entry;            
         }
@@ -189,15 +206,17 @@ sm_update(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 SM_RESULT
 sm_upsert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 {
-    SM_ENTRY *entry;
+    SM_ENTRY *entry, tmp;
+    SM_RESULT r;	
     size_t hash;
 
     assert(sm);
     assert(key);
 
-    hash = poly_hashs(key);
-    entry = find(sm, key, hash);
-    if (entry->key) {
+    hash = (sm->hash_func)(key);
+    r = rh_find(sm, key, hash, &entry);	
+    
+	if (r == SM_FOUND) {
         if (item) {
             *item = *entry;            
         }
@@ -206,15 +225,18 @@ sm_upsert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
     }
     if (sm->size == sm->msize) {
         if (grow(sm)) {
-            entry = find(sm, key, hash);
+            r = rh_find(sm, key, hash, &entry);
         }
         else {
             return SM_MAP_FULL;
         }
     }
-    entry->key = key;
-    entry->data = data;
-    entry->hash = hash;
+
+    tmp.key = key;
+    tmp.data = data;
+	tmp.hash = hash;
+	entry = rh_insert(sm, tmp, entry);
+
     if (item) {
         *item = *entry;            
     }
@@ -227,15 +249,16 @@ SM_RESULT
 sm_lookup(const STRMAP * sm, const char *key, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
+    SM_RESULT r;
     size_t hash;
 
     assert(sm);
     assert(key);
 
-    hash = poly_hashs(key);
-    entry = find(sm, key, hash);
+    hash = (sm->hash_func)(key);
+    r = rh_find(sm, key, hash, &entry);
 
-    if (entry->key) {
+    if (r == SM_FOUND) {
         if (item) {
             *item = *entry;            
         }
@@ -249,15 +272,16 @@ SM_RESULT
 sm_remove(STRMAP * sm, const char *key, SM_ENTRY * item)
 {
     SM_ENTRY *entry;
+    SM_RESULT r;
     size_t hash;
 
     assert(sm);
     assert(key);
 
-    hash = poly_hashs(key);
-    entry = find(sm, key, hash);
+    hash = (sm->hash_func)(key);
+    r = rh_find(sm, key, hash, &entry);
 
-    if (entry->key) {
+    if (r == SM_FOUND) {
         if (item) {
             *item = *entry;            
         }
@@ -292,6 +316,10 @@ sm_probes_mean(const STRMAP * sm, size_t *max_probes)
     double mean;
 
     assert(sm);
+
+    if (max_probes) {
+        *max_probes = 0;
+    }
 
     if (!sm->size) {
         return 0.0;
@@ -391,6 +419,19 @@ poly_hashs(const char *key)
     return hash;
 }
 
+size_t 
+djb_hashs(const char *key)
+{
+    size_t h = 5381;
+
+    while (*key) {
+        h = ((h << 5) + h) ^ (unsigned char) (*key);
+        ++key;
+    }
+    
+    return h;
+}
+
 /*
  * private static functions
  */
@@ -401,7 +442,8 @@ DISTANCE(const SM_ENTRY * from, const SM_ENTRY * to, size_t capacity)
     return to >= from ? to - from : capacity - (from - to);
 }
 
-static size_t HOME(size_t x, size_t capacity) {
+static size_t 
+HOME(size_t x, size_t capacity) {
     return x % capacity;
 }
 
@@ -425,6 +467,8 @@ adjust(size_t x)
  * find entry with given key and hash in collision chain or return first
  * empty
  */
+
+/*
 SM_ENTRY *
 find(const STRMAP * sm, const char *key, size_t hash)
 {
@@ -446,6 +490,75 @@ find(const STRMAP * sm, const char *key, size_t hash)
         }
     }
 
+    return entry;
+}
+*/
+
+SM_RESULT
+rh_find(const STRMAP * sm, const char *key, size_t hash, SM_ENTRY **item)
+{
+    SM_ENTRY *entry, *stop, *ht;
+    size_t dist, entry_dist, capacity;
+
+    ht = sm->ht;
+    capacity = sm->capacity;
+
+    entry = ht + HOME(hash, capacity);
+    stop = ht + capacity;
+
+    dist = 0;
+    while (entry->key) {
+        entry_dist = DISTANCE(ht + HOME(entry->hash, capacity),
+                              entry, capacity);
+        if (dist > entry_dist) {
+            break;
+        }
+        if (hash == entry->hash) {
+            if (!strcmp(key, entry->key)) {
+                *item = entry;
+                return SM_FOUND;
+            }
+        }
+        ++dist;
+        if (++entry == stop) {
+            entry = ht;
+        }
+    }
+
+    *item = entry;
+    return SM_NOT_FOUND;
+}
+
+SM_ENTRY *
+rh_insert(const STRMAP * sm, SM_ENTRY item, SM_ENTRY *entry)
+{
+    SM_ENTRY *stop, *ht, temp;
+    size_t dist, entry_dist, capacity;
+
+    ht = sm->ht;
+    capacity = sm->capacity;
+
+    stop = ht + capacity;
+    dist = DISTANCE(ht + HOME(item.hash, capacity), entry, capacity);
+
+    while (entry->key) {
+        entry_dist = DISTANCE(ht + HOME(entry->hash, capacity),
+                              entry, capacity);
+        if (dist > entry_dist) {
+            /* swap */
+            temp = *entry;
+            *entry = item;
+            item = temp;
+            dist = entry_dist;
+        }
+
+        ++dist;
+        if (++entry == stop) {
+            entry = ht;
+        }
+    }
+    
+    *entry = item;
     return entry;
 }
 
@@ -494,34 +607,4 @@ grow(STRMAP * sm) {
     free(map);
     
     return sm;
-}
-
-int 
-same_chain(size_t ahash, size_t bhash, size_t range) {
-    size_t d = ahash >= bhash ? ahash - bhash : bhash - ahash;
-    
-    return d % range ? 0 : 1;
-}
-
-void
-order(STRMAP * sm, SM_ENTRY * start, SM_ENTRY * end)
-{
-    SM_ENTRY *stop, t;
-
-    stop = sm->ht + sm->capacity;
-
-    while (start != end) {
-        /* if curr entry hash great than last then swap */
-        if (same_chain(start->hash, end->hash, sm->capacity)) {
-            if (start->hash > end->hash) {
-                t = *end;
-                *end = *start;
-                *start = t;
-            }
-        }
-        
-        if (++start == stop) {
-            start = sm->ht;
-        }
-    }
 }

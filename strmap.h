@@ -68,7 +68,7 @@ extern "C" {
 /**
   @brief Create a string map which can contain at least `size` elements
 */
-    STRMAP *sm_create(size_t size);
+    STRMAP *sm_create(size_t size, size_t (*hash_func)(const char *key));
 
     STRMAP *sm_create_from(const STRMAP * sm, size_t size);
 
@@ -135,6 +135,7 @@ extern "C" {
     void sm_free(STRMAP * sm);
 
     size_t poly_hashs(const char *key);
+	size_t djb_hashs(const char *key);
 
 #ifdef __cplusplus
 }

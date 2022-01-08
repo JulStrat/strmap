@@ -7,6 +7,8 @@
 #include "robin_hood.h"
 #include "strmap.h"
 
+STRMAP *ht;
+
 typedef std::chrono::high_resolution_clock Clock;
 
 void fisher_yates_shuffle(char *s) {
@@ -52,7 +54,7 @@ int main(int argc, char **argv) {
   size_t csize, max_probe;
 
   // STRMAP *nht;
-  STRMAP *ht;
+
   char *ptr;
   
   MAP_SIZE = strtoul(argv[1], &ptr, 10);
@@ -90,9 +92,9 @@ int main(int argc, char **argv) {
   cout << "*******************\n";
 
 #ifdef RESERVE
-  ht = sm_create(MAP_SIZE);
+  ht = sm_create(MAP_SIZE, 0);
 #else  
-  ht = sm_create(0);
+  ht = sm_create(0, 0);
 #endif    
   if (!ht) {
       exit(-1);

@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
-#include <unordered_set>
+//#include <unordered_set>
 #include <vector>
 
 //#define USE_FAST_REDUCE 1
@@ -29,13 +29,13 @@ using namespace std;
 
 // sm_foreach callback
 void check_hash(SM_ENTRY item, void *ctx) {
-  if (poly_hashs(item.key) != item.hash) {
+  if (djb_hashs(item.key) != item.hash) {
     cout << "Hash error: " << item.hash << '\n';
   }
 }
 
 int main(int argc, char **argv) {
-  string str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  //string str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   string xstr = "ZbcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   chrono::duration<double> elapsed;
   SM_ENTRY rentry;
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   cout << "*** strmap words test ***\n";
   cout << "*************************\n";
 
-  ht = sm_create(keys.size());
+  ht = sm_create(keys.size(), djb_hashs);
 
   t1 = Clock::now();
   for (size_t i = 0; i < keys.size(); i++) {
