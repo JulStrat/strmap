@@ -29,7 +29,7 @@
   @file strmap.c
   @brief STRMAP - simple alternative to hcreate_r, hdestroy_r, hsearch_r GNU extensions
   @author I. Kakoulidis
-  @date 2021
+  @date 2022
   @license Public Domain
 */
 
@@ -39,9 +39,6 @@
 #include <errno.h>
 
 #include "strmap.h"
-/* 
-#define SM_ORDERED        
-*/
 
 static const size_t MIN_SIZE = 6;
 static const size_t MAX_SIZE = (~((size_t)0)) >> 1;
@@ -130,7 +127,7 @@ sm_create_from(const STRMAP * sm, size_t size)
     for (item = sm->ht; item != stop; ++item) {
         if (item->key) {
             r = rh_find(map, item->key, item->hash, &entry);
-			entry = rh_insert(map, *item, entry);
+            entry = rh_insert(map, *item, entry);
             ++(map->size);
         }
     }
@@ -161,14 +158,9 @@ sm_insert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
             }
         }
         tmp.key = key;
-		tmp.data = data;
-		tmp.hash = hash;
-		entry = rh_insert(sm, tmp, entry);
-		/*
-        entry->key = key;
-        entry->data = data;
-        entry->hash = hash;
-		*/
+        tmp.data = data;
+        tmp.hash = hash;
+        entry = rh_insert(sm, tmp, entry);
         if (item) {
             *item = *entry;            
         }
@@ -207,16 +199,16 @@ SM_RESULT
 sm_upsert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 {
     SM_ENTRY *entry, tmp;
-    SM_RESULT r;	
+    SM_RESULT r;    
     size_t hash;
 
     assert(sm);
     assert(key);
 
     hash = (sm->hash_func)(key);
-    r = rh_find(sm, key, hash, &entry);	
+    r = rh_find(sm, key, hash, &entry); 
     
-	if (r == SM_FOUND) {
+    if (r == SM_FOUND) {
         if (item) {
             *item = *entry;            
         }
@@ -234,8 +226,8 @@ sm_upsert(STRMAP * sm, const char *key, const void *data, SM_ENTRY * item)
 
     tmp.key = key;
     tmp.data = data;
-	tmp.hash = hash;
-	entry = rh_insert(sm, tmp, entry);
+    tmp.hash = hash;
+    entry = rh_insert(sm, tmp, entry);
 
     if (item) {
         *item = *entry;            
@@ -508,20 +500,21 @@ rh_find(const STRMAP * sm, const char *key, size_t hash, SM_ENTRY **item)
 
     dist = 0;
     while (entry->key) {
+        if ((hash == entry->hash) && (!strcmp(key, entry->key))) {
+            *item = entry;
+            return SM_FOUND;
+        }
+
         entry_dist = DISTANCE(ht + HOME(entry->hash, capacity),
                               entry, capacity);
-        if (dist > entry_dist) {
-            break;
-        }
-        if (hash == entry->hash) {
-            if (!strcmp(key, entry->key)) {
-                *item = entry;
-                return SM_FOUND;
+        if (dist <= entry_dist) {
+            ++dist;
+            if (++entry == stop) {
+                entry = ht;
             }
         }
-        ++dist;
-        if (++entry == stop) {
-            entry = ht;
+        else {
+            break;
         }
     }
 

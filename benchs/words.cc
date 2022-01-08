@@ -29,7 +29,7 @@ using namespace std;
 
 // sm_foreach callback
 void check_hash(SM_ENTRY item, void *ctx) {
-  if (djb_hashs(item.key) != item.hash) {
+  if (poly_hashs(item.key) != item.hash) {
     cout << "Hash error: " << item.hash << '\n';
   }
 }
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   cout << "*** strmap words test ***\n";
   cout << "*************************\n";
 
-  ht = sm_create(keys.size(), djb_hashs);
+  ht = sm_create(keys.size(), 0);
 
   t1 = Clock::now();
   for (size_t i = 0; i < keys.size(); i++) {
