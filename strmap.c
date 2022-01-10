@@ -30,7 +30,7 @@
   @brief STRMAP - simple alternative to hcreate_r, hdestroy_r, hsearch_r GNU extensions
   @author I. Kakoulidis
   @date 2022
-  @license Public Domain
+  @license The Unlicense
 */
 
 #include <stdlib.h>
@@ -58,16 +58,20 @@ static const SM_ENTRY EMPTY = { 0, 0, 0 };
 static size_t DISTANCE(const SM_ENTRY * from, const SM_ENTRY * to, size_t capacity);
 static size_t HOME(size_t x, size_t capacity);
 
+STRMAP *grow(STRMAP * sm);
+static size_t adjust(size_t x);
+
+/* Robin Hood helpers */
 SM_RESULT rh_find(const STRMAP * sm, const char *key,
                   size_t hash, SM_ENTRY **item);
 
 SM_ENTRY *rh_insert(const STRMAP * sm, SM_ENTRY item, SM_ENTRY *entry);
 
-static void compress(STRMAP * sm, SM_ENTRY * entry);
+/*
+TO DO - check dist 0
+*/
+static void rh_shift(STRMAP * sm, SM_ENTRY * entry);
 
-STRMAP *grow(STRMAP * sm);
-
-static size_t adjust(size_t x);
 
 STRMAP *
 sm_create(size_t size, size_t (*hash_func)(const char *key))
@@ -279,7 +283,7 @@ sm_remove(STRMAP * sm, const char *key, SM_ENTRY * item)
         }
         *entry = EMPTY;
         --(sm->size);
-        compress(sm, entry);
+        rh_shift(sm, entry);
         return SM_REMOVED;
     }
 
@@ -442,49 +446,25 @@ HOME(size_t x, size_t capacity) {
 static size_t
 adjust(size_t x) 
 {
-    static const int WHEEL[30] = {
-        1, 0, 5, 4, 3, 2,
-        1, 0, 3, 2, 1, 0,
-        1, 0, 3, 2, 1, 0,
-        1, 0, 3, 2, 1, 0,
-        5, 4, 3, 2, 1, 0
+    static const size_t WHEEL[64] = {
+        1, 11, 13, 17, 19, 23, 29, 31, 
+        37, 41, 43, 47, 53, 59, 61, 67,
+        71, 73, 79, 83, 89, 97, 101, 103,
+        107, 109, 113, 121, 127, 131, 137, 139,
+        143, 149, 151, 157, 163, 167, 169, 173,
+        179, 181, 187, 191, 193, 197, 199, 209
     };
-    x += WHEEL[x % 30];
-    assert((x % 2) && (x % 3) && (x % 5));
-
-    return x;
-}
-
-/*
- * find entry with given key and hash in collision chain or return first
- * empty
- */
-
-/*
-SM_ENTRY *
-find(const STRMAP * sm, const char *key, size_t hash)
-{
-    SM_ENTRY *entry, *stop;
-    size_t i;
-
-    entry = sm->ht + HOME(hash, sm->capacity);
-    stop = sm->ht + sm->capacity;
+    size_t m = x % 210;    
+    int i = 0;
     
-    while (entry->key) {
-        if (hash == entry->hash) {
-            if (!strcmp(key, entry->key)) {
-                return entry;
-            }
-        }
-
-        if (++entry == stop) {
-            entry = sm->ht;
-        }
+    while ((i < 64) && (m > WHEEL[i])) {
+        ++i;
     }
-
-    return entry;
+    /*
+    209 = 210 - 1
+    */
+    return x + (WHEEL[i] - m);
 }
-*/
 
 SM_RESULT
 rh_find(const STRMAP * sm, const char *key, size_t hash, SM_ENTRY **item)
@@ -556,7 +536,7 @@ rh_insert(const STRMAP * sm, SM_ENTRY item, SM_ENTRY *entry)
 }
 
 void
-compress(STRMAP * sm, SM_ENTRY * entry)
+rh_shift(STRMAP * sm, SM_ENTRY * entry)
 {
     SM_ENTRY *empty, *root, *stop;
 

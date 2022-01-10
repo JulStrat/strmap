@@ -29,8 +29,8 @@
   @file strmap.h
   @brief STRMAP - simple alternative to hcreate_r, hdestroy_r, hsearch_r GNU extensions
   @author I. Kakoulidis  
-  @date 2021
-  @license Public Domain
+  @date 2022
+  @license The Unlicense
 */
 
 #ifndef _STRMAP_H
@@ -39,8 +39,8 @@
 #include <stddef.h> /* size_t */
 
 #define STRMAP_VERSION_MAJOR 0
-#define STRMAP_VERSION_MINOR 5
-#define STRMAP_VERSION_PATCH 1
+#define STRMAP_VERSION_MINOR 6
+#define STRMAP_VERSION_PATCH 0
 
 typedef struct STRMAP STRMAP;
 
